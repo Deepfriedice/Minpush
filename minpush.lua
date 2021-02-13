@@ -24,14 +24,14 @@ state = {
 --text = "(e).haH.x"
 text = [[
 `a.
-d1D
+d0D
 ?
 	`b.
 	`c.
-	`!.
-	`z.
+	`d.
+	`e.
 ;
-`d.
+`f.
 haH.
 x
 ]]
@@ -45,7 +45,7 @@ print("running...")
 state.running = true
 while state.running do
 	--print(state.ip)
-	if state.ip > #prog then print("out of bounds") break end
+	if state.ip > #prog then print("out of bounds:", state.ip) break end
 	step(prog, state)
 	-- for k,v in ipairs(state.dstack) do print(v) end
 end

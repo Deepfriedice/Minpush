@@ -53,6 +53,13 @@ ops.restart = function (state)
 end
 
 
+ops.jump_n = function (n)
+	return function (state)
+		state.ip = n
+	end
+end
+
+
 ops.seek_n = function (n)
 	return function (state)
 		state.ip = state.ip + n

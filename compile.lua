@@ -33,17 +33,36 @@ function compile (text)
 end
 
 
-function compile_instr (prog, cstate, c)
+-- emit the "post" jumps which should
+-- be at the start of each block
+function start_block (prog, cstate)
 
-	-- add posts
-	if cstate.cond and #prog % BLOCK_LEN == 0 then
+	--if cstate.root == 0 then
+	if false then -- until states are implemented
+		table.insert(prog, ops.noop)
+		print(#prog, "noop")
+
+	elseif not cstate.cond then
 		table.insert(prog, ops.seek_n(2))
 		print(#prog, "seek", 2)
-	end
-
-	if cstate.cond and #prog % BLOCK_LEN == 1 then
 		table.insert(prog, ops.seek_n(BLOCK_LEN))
 		print(#prog, "seek", BLOCK_LEN)
+
+	else
+		table.insert(prog, ops.seek_n(3))
+		print(#prog, "seek", 3)
+		table.insert(prog, ops.seek_n(BLOCK_LEN))
+		print(#prog, "seek", BLOCK_LEN)
+		table.insert(prog, ops.seek_n(BLOCK_LEN))
+		print(#prog, "seek", BLOCK_LEN)
+
+	end
+end
+
+
+function compile_instr (prog, cstate, c)
+	if #prog % BLOCK_LEN == 0 then
+		start_block(prog, cstate)
 	end
 
 	-- compile
@@ -68,19 +87,28 @@ function compile_instr (prog, cstate, c)
 	elseif c == '{' then
 		cstate.mode = "state"
 
+	elseif c == '}' then
+		if cstate.cond then error("unfinished condition") end
+		table.insert(prog, ops.jump_n(cond.root))
+		print(#prog, "jump", cstate.root)
+		cstate.root = 0
+		while #prog % BLOCK_LEN ~= 0 do
+			table.insert(prog, ops.noop)
+			print(#prog, "noop")
+		end
+
 	elseif c == '?' then
 		if cstate.cond then error("nested condition") end
 		cstate.cond = true
-		local next_post = (-#prog % BLOCK_LEN) + #prog + 2
-		table.insert(prog, ops.cond(next_post))
-		print(#prog, "cond", next_post)
+		local block_start = #prog - (#prog % BLOCK_LEN) + 1
+		local skip_dest = block_start + BLOCK_LEN + 2
+		table.insert(prog, ops.cond(skip_dest))
+		print(#prog, "cond", skip_dest)
 
 	elseif c == ';' then
 		if not cstate.cond then error("free condition end") end
 		cstate.cond = false
-		local next_post = (1 - #prog) % BLOCK_LEN + #prog
-
-		while #prog < next_post do
+		while #prog % BLOCK_LEN ~= 0 do
 			table.insert(prog, ops.noop)
 			print(#prog, "noop")
 		end
