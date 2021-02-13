@@ -116,17 +116,27 @@ function compile_instr (prog, cstate, c)
 	elseif c == '+' then
 		table.insert(prog, ops.add)
 		print(#prog, "+")
+
 	elseif c == '.' then
 		table.insert(prog, ops.write)
-		print(#prog, ".")
+		print(#prog, "write")
+
+	elseif c == 'c' then
+		table.insert(prog, ops.copy)
+		print(#prog, "copy")
+
 	elseif c == 's' then
 		table.insert(prog, ops.swap)
+		print(#prog, "swap")
+
 	elseif c == 'r' then
 		table.insert(prog, ops.restart)
-		print(#prog, "r")
+		print(#prog, "restart")
+
 	elseif c == 'x' then
 		table.insert(prog, ops.exit)
-		print(#prog, "x")
+		print(#prog, "exit")
+
 	else
 		print("Invalid instruction:", c)
 	end

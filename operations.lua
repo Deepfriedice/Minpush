@@ -29,6 +29,13 @@ ops.swap = function (state)
 end
 
 
+ops.copy = function (state)
+	state.ip = state.ip + 1
+	local tos = state.dstack[#state.dstack]
+	table.insert(state.dstack, tos)
+end
+
+
 ops.write = function (state)
 	state.ip = state.ip + 1
 	local n = table.remove(state.dstack)

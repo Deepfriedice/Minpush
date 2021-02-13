@@ -19,22 +19,7 @@ state = {
 }
 
 
---text = "2 5 48 ++ . x"
---text = "`Md100D..haH.x"
---text = "(e).haH.x"
-text = [[
-`a.
-d0D
-?
-	`b.
-	`c.
-	`d.
-	`e.
-;
-`f.
-haH.
-x
-]]
+text = "`a `b c c . . . . haH. x"
 
 
 prog = compile(text)
