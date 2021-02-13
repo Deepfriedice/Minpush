@@ -138,9 +138,8 @@ function compile_instr (prog, cstate, c)
 		print(#prog, "exit")
 
 	else
-		print("Invalid instruction:", c)
+		error("Invalid instruction: " .. c)
 	end
-	return new_mode
 end
 
 
@@ -162,7 +161,7 @@ function compile_deci (prog, cstate, c)
 		print(#prog, "push", cstate.buffer)
 		cstate.mode = 'instr'
 	else
-		print("Invalid decimal:", c)
+		error("Invalid decimal: " .. c)
 	end
 end
 
@@ -181,7 +180,7 @@ function compile_hexa (prog, cstate, c)
 		print(#prog, "push", cstate.buffer)
 		cstate.mode = 'instr'
 	else
-		print("Invalid hexadecimal:", c)
+		error("Invalid hexadecimal: " .. c)
 	end
 end
 
@@ -199,7 +198,7 @@ function compile_label (prog, cstate, c)
 		print(#prog, "push", cstate.buffer)
 		cstate.mode = 'instr'
 	else
-		print("Invalid label:", c)
+		error("Invalid label: " .. c)
 	end
 end
 
@@ -218,6 +217,6 @@ function compile_state (prog, cstate, c)
 		cstate.root = #prog
 		cstate.mode = 'instr'
 	else
-		print("Invalid label:", c)
+		error("Invalid label: " .. c)
 	end
 end
