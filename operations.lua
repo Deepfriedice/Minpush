@@ -121,10 +121,20 @@ ops.seek_n = function (n)
 end
 
 
-ops.enter = function (label)
+ops.enter = function (label, dest)
 	return function (state)
-		--TODO
+		if state.label == label then
+			state.ip = state.ip + 1
+		else
+			state.ip = dest
+		end
 	end
+end
+
+
+ops.switch = function (state)
+	state.label = table.remove(state.dstack)
+	state.ip = 1
 end
 
 

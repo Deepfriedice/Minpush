@@ -7,13 +7,14 @@ BLOCK_LEN = 10
 function compile (text)
 	local prog = {}
 	local cstate = {
-		mode = "instr",
+		mode = "body",
 		cond = false,
 		buffer = nil,
 		root = 0
 	}
 
 	local compilers = {
+		body  = compile_body,
 		instr = compile_instr,
 		char  = compile_char,
 		deci  = compile_deci,
@@ -37,8 +38,7 @@ end
 -- be at the start of each block
 function start_block (prog, cstate)
 
-	--if cstate.root == 0 then
-	if false then -- until states are implemented
+	if cstate.root == 0 then
 		table.insert(prog, ops.noop)
 		print(#prog, "noop")
 
@@ -56,6 +56,22 @@ function start_block (prog, cstate)
 		table.insert(prog, ops.seek_n(BLOCK_LEN))
 		print(#prog, "seek", BLOCK_LEN)
 
+	end
+end
+
+
+function compile_body (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+
+	elseif c == '{' then
+		cstate.buffer = 0
+		cstate.mode = "state"
+		table.insert(prog, ops.noop)  -- ensure enter will be aligned
+		print(#prog, "noop")
+
+	else
+		error("Invalid body command: " .. c)
 	end
 end
 
@@ -84,14 +100,12 @@ function compile_instr (prog, cstate, c)
 		cstate.buffer = 0
 		cstate.mode = "label"
 
-	elseif c == '{' then
-		cstate.mode = "state"
-
 	elseif c == '}' then
 		if cstate.cond then error("unfinished condition") end
-		table.insert(prog, ops.jump_n(cond.root))
+		table.insert(prog, ops.jump_n(cstate.root))
 		print(#prog, "jump", cstate.root)
 		cstate.root = 0
+		cstate.mode = "body"
 		while #prog % BLOCK_LEN ~= 0 do
 			table.insert(prog, ops.noop)
 			print(#prog, "noop")
@@ -148,6 +162,10 @@ function compile_instr (prog, cstate, c)
 	elseif c == 'r' then
 		table.insert(prog, ops.restart)
 		print(#prog, "restart")
+
+	elseif c == '@' then
+		table.insert(prog, ops.switch)
+		print(#prog, "switch")
 
 	elseif c == 'x' then
 		table.insert(prog, ops.exit)
@@ -228,8 +246,10 @@ function compile_state (prog, cstate, c)
 			'a' <= c and c <= 'z' then
 		cstate.buffer = ksum(cstate.buffer, c:byte())
 	elseif c == ':' then
-		table.insert(prog, ops.enter(cstate.buffer))
-		print(#prog, "enter", cstate.buffer)
+		local block_start = #prog - (#prog % BLOCK_LEN) + 1
+		local skip_dest = block_start + BLOCK_LEN + 1
+		table.insert(prog, ops.enter(cstate.buffer, skip_dest))
+		print(#prog, "enter", cstate.buffer, skip_dest)
 		cstate.root = #prog
 		cstate.mode = 'instr'
 	else

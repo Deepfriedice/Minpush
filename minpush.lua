@@ -1,4 +1,5 @@
 require "compile"
+require "ksum"
 
 
 function step(prog, state)
@@ -12,14 +13,30 @@ state = {
 	dstack = {},
 	astack = {},
 	alstack = {},
-	dest = 0,
+	label = ksum_text("start"),
 	reg = {
-		c = 0, w = 0, x = 0, y = 0, z = 0,
+		w = 0, x = 0, y = 0, z = 0,
 	},
 }
 
 
-text = "`a `b c c . . . . haH. x"
+text = [[
+	
+	{ start :
+		d0D
+		(loop) @
+	}
+	
+	{ loop :
+		c d10D = ?
+			x
+		;
+		c `0 + .
+		haH .
+		d1D +
+	}
+	
+]]
 
 
 prog = compile(text)
