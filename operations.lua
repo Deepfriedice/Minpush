@@ -22,6 +22,53 @@ ops.add = function (state)
 end
 
 
+ops.eq = function (state)
+	local i = table.remove(state.dstack)
+	local j = table.remove(state.dstack)
+	if j == i then
+		table.insert(state.dstack, -1)
+	else
+		table.insert(state.dstack, 0)
+	end
+	state.ip = state.ip + 1
+end
+
+
+ops.gt = function (state)
+	local i = table.remove(state.dstack)
+	local j = table.remove(state.dstack)
+	if j > i then
+		table.insert(state.dstack, -1)
+	else
+		table.insert(state.dstack, 0)
+	end
+	state.ip = state.ip + 1
+end
+
+
+ops.lt = function (state)
+	local i = table.remove(state.dstack)
+	local j = table.remove(state.dstack)
+	if j < i then
+		table.insert(state.dstack, -1)
+	else
+		table.insert(state.dstack, 0)
+	end
+	state.ip = state.ip + 1
+end
+
+
+ops.lnot = function (state)
+	local i = table.remove(state.dstack)
+	if i ~= 0 then
+		table.insert(state.dstack, -1)
+	else
+		table.insert(state.dstack, 0)
+	end
+	state.ip = state.ip + 1
+end
+
+
 ops.swap = function (state)
 	state.ip = state.ip + 1
 	local len = #state.dstack

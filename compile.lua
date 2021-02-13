@@ -117,6 +117,22 @@ function compile_instr (prog, cstate, c)
 		table.insert(prog, ops.add)
 		print(#prog, "+")
 
+	elseif c == '=' then
+		table.insert(prog, ops.eq)
+		print(#prog, "=")
+
+	elseif c == '>' then
+		table.insert(prog, ops.gt)
+		print(#prog, ">")
+
+	elseif c == '<' then
+		table.insert(prog, ops.lt)
+		print(#prog, "<")
+
+	elseif c == '!' then
+		table.insert(prog, ops.lnot)
+		print(#prog, "not")
+
 	elseif c == '.' then
 		table.insert(prog, ops.write)
 		print(#prog, "write")
