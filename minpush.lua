@@ -24,10 +24,7 @@ text = [[
 	
 	{ start :
 		d0D
-		(loop) @
-	}
-	
-	{ loop :
+		$
 		c d10D = ?
 			x
 		;

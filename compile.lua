@@ -163,6 +163,9 @@ function compile_instr (prog, cstate, c)
 		table.insert(prog, ops.restart)
 		print(#prog, "restart")
 
+	elseif c == '$' then
+		cstate.root = #prog + 1
+
 	elseif c == '@' then
 		table.insert(prog, ops.switch)
 		print(#prog, "switch")
