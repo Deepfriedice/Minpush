@@ -30,6 +30,8 @@ function compile (text)
 		compiler(prog, cstate, c)
 	end
 
+	compile_stop(prog, cstate)
+
 	return prog
 end
 
@@ -179,10 +181,6 @@ function compile_instr (prog, cstate, c)
 		table.insert(prog, ops.switch)
 		print(#prog, "switch")
 
-	elseif c == 'x' then
-		table.insert(prog, ops.exit)
-		print(#prog, "exit")
-
 	else
 		error("Invalid instruction: " .. c)
 	end
@@ -267,4 +265,14 @@ function compile_state (prog, cstate, c)
 	else
 		error("Invalid label: " .. c)
 	end
+end
+
+
+function compile_stop (prog, cstate)
+	while #prog % BLOCK_LEN ~= 1 do
+		table.insert(prog, ops.noop)
+		print(#prog, "noop")
+	end
+	table.insert(prog, ops.exit)
+	print(#prog, "exit")
 end

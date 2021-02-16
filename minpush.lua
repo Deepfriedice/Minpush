@@ -23,14 +23,14 @@ state = {
 text = [[
 	
 	{ start :
-		d0D
+		d0D X
 		$
-		c d10D = ?
-			x
+		x d10D = ?
+			(stop) @
 		;
-		c `0 + .
+		x `0 + .
 		haH .
-		d1D +
+		x d1D + X
 	}
 	
 ]]
