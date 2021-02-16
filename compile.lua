@@ -166,6 +166,15 @@ function compile_instr (prog, cstate, c)
 	elseif c == '$' then
 		cstate.root = #prog + 1
 
+	elseif 'W' <= c and c <= 'Z' then
+		local r = string.lower(c)
+		table.insert(prog, ops.set_r(r))
+		print(#prog, "set " .. r)
+
+	elseif 'w' <= c and c <= 'x' then
+		table.insert(prog, ops.get_r(c))
+		print(#prog, "get " .. c)
+
 	elseif c == '@' then
 		table.insert(prog, ops.switch)
 		print(#prog, "switch")

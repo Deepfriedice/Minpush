@@ -149,3 +149,19 @@ ops.cond = function (post)
 		end
 	end
 end
+
+ops.set_r = function (r)
+	return function (state)
+		local n = table.remove(state.dstack)
+		state.reg[r] = n
+		state.ip = state.ip + 1
+	end
+end
+
+ops.get_r = function (r)
+	return function (state)
+		local n = state.reg[r]
+		table.insert(state.dstack, n)
+		state.ip = state.ip + 1
+	end
+end
