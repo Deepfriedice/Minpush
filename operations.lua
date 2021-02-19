@@ -102,11 +102,6 @@ ops.exit = function (state)
 end
 
 
-ops.restart = function (state)
-	state.ip = 1
-end
-
-
 ops.jump_n = function (n)
 	return function (state)
 		state.ip = n

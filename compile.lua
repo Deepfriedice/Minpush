@@ -162,8 +162,8 @@ function compile_instr (prog, cstate, c)
 		print(#prog, "swap")
 
 	elseif c == 'r' then
-		table.insert(prog, ops.restart)
-		print(#prog, "restart")
+		table.insert(prog, ops.jump_n(cstate.root))
+		print(#prog, "jump", cstate.root)
 
 	elseif c == '$' then
 		cstate.root = #prog + 1
