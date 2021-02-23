@@ -1,50 +1,17 @@
 require "compile"
-require "ksum"
+require "run"
 
+filename = assert(arg[1], "No program!")
+src_file = assert(io.open(filename), "Cannot open: "..filename)
+text = src_file:read("a")
+src_file:close()
 
-function step(prog, state)
-	prog[state.ip](state)
-end
-
-
-state = {
-	ip = 1,
-	running = false,
-	dstack = {},
-	astack = {},
-	alstack = {},
-	label = ksum_text("start"),
-	reg = {
-		w = 0, x = 0, y = 0, z = 0,
-	},
-}
-
-
-text = [[
-	
-	{ start :
-		d0D X
-		$
-		x d10D = ?
-			(stop) @
-		;
-		x `0 + .
-		haH .
-		x d1D + X
-	}
-	
-]]
-
+print("compiling...")
 
 prog = compile(text)
 
---for k,v in ipairs(prog) do print(k, v) end
-
 print("running...")
-state.running = true
-while state.running do
-	--print(state.ip)
-	if state.ip > #prog then error("out of bounds: " .. state.ip) end
-	step(prog, state)
-	-- for k,v in ipairs(state.dstack) do print(v) end
-end
+
+run(prog)
+
+print("done")
