@@ -113,6 +113,7 @@ function compile_instr (prog, cstate, c)
 
 	elseif c == ';' then
 		if not cstate.cond then error("free condition end") end
+		emit.jump(prog, cstate.root)
 		cstate.cond = false
 		while #prog % BLOCK_LEN ~= 0 do
 			emit.noop(prog)
@@ -141,9 +142,6 @@ function compile_instr (prog, cstate, c)
 
 	elseif c == 's' then
 		emit.swap(prog)
-
-	elseif c == 'r' then
-		emit.jump(prog, cstate.root)
 
 	elseif c == '$' then
 		cstate.root = #prog + 1

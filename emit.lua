@@ -149,7 +149,7 @@ end
 
 
 function emit.jump (prog, dest)
-	debug_print(#prog + 1, "jump" .. dest)
+	debug_print(#prog + 1, "jump " .. dest)
 	table.insert(prog, function (state)
 		state.ip = dest
 	end)
