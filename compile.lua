@@ -20,6 +20,9 @@ function compile (text)
 		deci  = compile_deci,
 		hexa  = compile_hexa,
 		label = compile_label,
+		str   = compile_str,
+		bytes = compile_bytes,
+		b_mid = compile_b_mid,
 		state = compile_state,
 	}
 
@@ -94,6 +97,14 @@ function compile_instr (prog, cstate, c)
 	elseif c == '(' then
 		cstate.buffer = 0
 		cstate.mode = "label"
+
+	elseif c == "'" then
+		cstate.buffer = {}
+		cstate.mode = "str"
+
+	elseif c == '[' then
+		cstate.buffer = {}
+		cstate.mode = "bytes"
 
 	elseif c == '}' then
 		if cstate.cond then error("unfinished condition") end
@@ -214,6 +225,63 @@ function compile_label (prog, cstate, c)
 		cstate.mode = 'instr'
 	else
 		error("Invalid label: " .. c)
+	end
+end
+
+
+function compile_str (prog, cstate, c)
+	if  c == '"' then
+		emit.push_array(prog, cstate.buffer)
+		cstate.mode = 'instr'
+	else
+		table.insert(cstate.buffer, c:byte())
+	end
+end
+
+
+function compile_bytes (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif '0' <= c and c <= '9' then
+		local n = c:byte() - string.byte('0')
+		table.insert(cstate.buffer, 16 * n)
+		cstate.mode = 'b_mid'
+	elseif 'A' <= c and c <= 'F' then
+		local n = c:byte() - string.byte('A') + 10
+		table.insert(cstate.buffer, 16 * n)
+		cstate.mode = 'b_mid'
+	elseif 'a' <= c and c <= 'f' then
+		local n = c:byte() - string.byte('a') + 10
+		table.insert(cstate.buffer, 16 * n)
+		cstate.mode = 'b_mid'
+	elseif  c == ']' then
+		emit.push_array(prog, cstate.buffer)
+		cstate.mode = 'instr'
+	else
+		error("Character " .. c .. " not valid in bytes")
+	end
+end
+
+
+function compile_b_mid (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif '0' <= c and c <= '9' then
+		local n = c:byte() - string.byte('0')
+		cstate.buffer[#cstate.buffer] = cstate.buffer[#cstate.buffer] + n
+		cstate.mode = 'bytes'
+	elseif 'A' <= c and c <= 'F' then
+		local n = c:byte() - string.byte('A') + 10
+		cstate.buffer[#cstate.buffer] = cstate.buffer[#cstate.buffer] + n
+		cstate.mode = 'bytes'
+	elseif 'a' <= c and c <= 'f' then
+		local n = c:byte() - string.byte('a') + 10
+		cstate.buffer[#cstate.buffer] = cstate.buffer[#cstate.buffer] + n
+		cstate.mode = 'bytes'
+	elseif  c == ']' then
+		error("literal bytes must have even length!")
+	else
+		error("Character " .. c .. " not valid in bytes")
 	end
 end
 

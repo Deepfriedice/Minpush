@@ -27,6 +27,15 @@ function emit.push (prog, n)
 	end)
 end
 
+function emit.push_array (prog, a)
+	debug_print(#prog + 1, "push array (" .. #a .. ")")
+	table.insert(prog, function (state)
+		table.insert(state.astack, a)
+		table.insert(state.alstack, #a)
+		state.ip = state.ip + 1
+	end)
+end
+
 
 function emit.add (prog)
 	debug_print(#prog + 1, "add")
