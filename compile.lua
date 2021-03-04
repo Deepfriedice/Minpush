@@ -148,11 +148,20 @@ function compile_instr (prog, cstate, c)
 	elseif c == '.' then
 		emit.write(prog)
 
+	elseif c == '_' then
+		emit.array_write(prog)
+
 	elseif c == 'c' then
 		emit.copy(prog)
 
+	elseif c == 'C' then
+		emit.array_copy(prog)
+
 	elseif c == 's' then
 		emit.swap(prog)
+
+	elseif c == 'S' then
+		emit.array_swap(prog)
 
 	elseif c == '$' then
 		cstate.root = #prog + 1

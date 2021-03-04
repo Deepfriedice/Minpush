@@ -117,11 +117,33 @@ function emit.swap (prog)
 end
 
 
+function emit.array_swap (prog)
+	debug_print(#prog + 1, "array swap")
+	table.insert(prog, function (state)
+		local len = #state.alstack
+		state.alstack[len - 1], state.alstack[len] = state.alstack[len], state.alstack[len - 1]
+		state.astack[len - 1], state.astack[len] = state.astack[len], state.astack[len - 1]
+		state.ip = state.ip + 1
+	end)
+end
+
+
 function emit.copy (prog)
 	debug_print(#prog + 1, "copy")
 	table.insert(prog, function (state)
 		local tos = state.dstack[#state.dstack]
 		table.insert(state.dstack, tos)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.array_copy (prog)
+	debug_print(#prog + 1, "array copy")
+	table.insert(prog, function (state)
+		local len = #state.alstack
+		table.insert(state.alstack, state.alstack[len])
+		table.insert(state.astack, state.astack[len])
 		state.ip = state.ip + 1
 	end)
 end
@@ -133,6 +155,20 @@ function emit.write (prog)
 		local n = table.remove(state.dstack)
 		local c = string.char(n)
 		io.write(c)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.array_write (prog)
+	debug_print(#prog + 1, "array write")
+	table.insert(prog, function (state)
+		local n = table.remove(state.alstack)
+		local data = table.remove(state.astack)
+		for k,v in ipairs(data) do
+			local c = string.char(v)
+			io.write(c)
+		end
 		state.ip = state.ip + 1
 	end)
 end
