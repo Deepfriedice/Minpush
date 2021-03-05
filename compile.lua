@@ -143,7 +143,7 @@ function compile_instr (prog, cstate, c)
 		emit.lt(prog)
 
 	elseif c == '!' then
-		emit.lnot(prog)
+		emit.bnot(prog)
 
 	elseif c == '.' then
 		emit.write(prog)

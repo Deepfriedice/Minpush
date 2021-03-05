@@ -1,3 +1,7 @@
+WORD_MASK = 0xffffffff
+BYTE_MASK = 0xff
+
+
 DEBUG_EMIT_PRINT = true
 
 
@@ -93,15 +97,11 @@ function emit.lt (prog)
 end
 
 
-function emit.lnot (prog)
-	debug_print(#prog + 1, "lnot")
+function emit.bnot (prog)
+	debug_print(#prog + 1, "bit not")
 	table.insert(prog, function (state)
-		local i = table.remove(state.dstack)
-		if i ~= 0 then
-			table.insert(state.dstack, -1)
-		else
-			table.insert(state.dstack, 0)
-		end
+		local len = #state.dstack
+		state.dstack[len] = ~state.dstack[len]
 		state.ip = state.ip + 1
 	end)
 end
@@ -153,6 +153,7 @@ function emit.write (prog)
 	debug_print(#prog + 1, "write")
 	table.insert(prog, function (state)
 		local n = table.remove(state.dstack)
+		n = n & BYTE_MASK
 		local c = string.char(n)
 		io.write(c)
 		state.ip = state.ip + 1
