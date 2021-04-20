@@ -155,7 +155,7 @@ function emit.write (prog)
 		local n = table.remove(state.dstack)
 		n = n & BYTE_MASK
 		local c = string.char(n)
-		io.write(c)
+		state.output:write(c)
 		state.ip = state.ip + 1
 	end)
 end
@@ -168,7 +168,7 @@ function emit.array_write (prog)
 		local data = table.remove(state.astack)
 		for k,v in ipairs(data) do
 			local c = string.char(v)
-			io.write(c)
+			state.output:write(c)
 		end
 		state.ip = state.ip + 1
 	end)
