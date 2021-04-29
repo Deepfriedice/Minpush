@@ -185,6 +185,22 @@ function emit.read (prog)
 	end)
 end
 
+function emit.trim (prog)
+	debug_print(#prog + 1, "trim")
+	table.insert(prog, function (state)
+		table.remove(state.dstack)
+		state.ip = state.ip + 1
+	end)
+end
+
+function emit.trim_array (prog)
+	debug_print(#prog + 1, "trim array")
+	table.insert(prog, function (state)
+		table.remove(state.alstack)
+		table.remove(state.astack)
+		state.ip = state.ip + 1
+	end)
+end
 
 function emit.exit (prog)
 	debug_print(#prog + 1, "exit")

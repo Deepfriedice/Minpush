@@ -141,5 +141,21 @@ function test_literals ()
 	run_test("literals", src, input, output)
 end
 
+function test_trim ()
+	src = [[
+		{ start :
+			`a `b `c
+			. t .
+			` .
+			'Foo" 'Bar"
+			T _
+			(stop) @
+		}
+	]]
+	input = ""
+	output = "ca Foo"
+	run_test("trim & array trim", src, input, output)
+end
+
 
 run_all_tests()
