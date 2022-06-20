@@ -178,9 +178,15 @@ end
 function emit.read (prog)
 	debug_print(#prog + 1, "read")
 	table.insert(prog, function (state)
-		local c = io.read(1)
-		local n = string.byte(c)
-		table.insert(state.dstack, n)
+		local c = state.input:read(1)
+		if c == nil then
+			table.insert(state.dstack, 0)
+			table.insert(state.dstack, 0)
+		else
+			local n = string.byte(c)
+			table.insert(state.dstack, n)
+			table.insert(state.dstack, -1)
+		end
 		state.ip = state.ip + 1
 	end)
 end

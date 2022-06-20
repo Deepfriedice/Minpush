@@ -151,6 +151,9 @@ function compile_instr (prog, cstate, c)
 	elseif c == '_' then
 		emit.array_write(prog)
 
+	elseif c == 'i' then
+		emit.read(prog)
+
 	elseif c == 't' then
 		emit.trim(prog)
 

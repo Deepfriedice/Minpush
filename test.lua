@@ -157,5 +157,12 @@ function test_trim ()
 	run_test("trim & array trim", src, input, output)
 end
 
+function test_input ()
+	src = "{ start : i ! ? (stop) @ ; . }"
+	input = "Hello World!"
+	output = "Hello World!"
+	run_test("cat", src, input, output)
+end
+
 
 run_all_tests()
