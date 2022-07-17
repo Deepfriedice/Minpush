@@ -8,7 +8,6 @@ function compile (text)
 	local prog = {}
 	local cstate = {
 		mode = "body",
-		cond = false,
 		buffer = nil,
 		root = 0
 	}
@@ -19,11 +18,12 @@ function compile (text)
 		char  = compile_char,
 		deci  = compile_deci,
 		hexa  = compile_hexa,
-		label = compile_label,
 		str   = compile_str,
 		bytes = compile_bytes,
 		b_mid = compile_b_mid,
 		state = compile_state,
+		switch = compile_switch,
+		cond_switch = compile_cond_switch,
 	}
 
 	for i = 1, #text do
@@ -39,26 +39,6 @@ function compile (text)
 end
 
 
--- emit the "post" jumps which should
--- be at the start of each block
-function start_block (prog, cstate)
-
-	if cstate.root == 0 then
-		emit.noop(prog)
-
-	elseif not cstate.cond then
-		emit.seek(prog, 2)
-		emit.seek(prog, BLOCK_LEN)
-
-	else
-		emit.seek(prog, 3)
-		emit.seek(prog, BLOCK_LEN)
-		emit.seek(prog, BLOCK_LEN)
-
-	end
-end
-
-
 function compile_body (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
@@ -66,7 +46,6 @@ function compile_body (prog, cstate, c)
 	elseif c == '{' then
 		cstate.buffer = 0
 		cstate.mode = "state"
-		emit.noop(prog)  -- ensure enter will be aligned
 
 	else
 		error("Invalid body command: " .. c)
@@ -74,9 +53,34 @@ function compile_body (prog, cstate, c)
 end
 
 
+function compile_state (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == '_' or
+			'0' <= c and c <= '9' or
+			'A' <= c and c <= 'Z' or
+			'a' <= c and c <= 'z' then
+		cstate.buffer = ksum(cstate.buffer, c:byte())
+	elseif c == ':' then
+		local block_start = #prog - (#prog % BLOCK_LEN) + 1
+		local skip_dest = block_start + BLOCK_LEN + 1
+		emit.noop(prog)  -- ensure enter will be aligned
+		emit.enter(prog, cstate.buffer, skip_dest)
+		cstate.root = #prog
+		cstate.mode = 'instr'
+	else
+		error("Invalid label: " .. c)
+	end
+end
+
+
 function compile_instr (prog, cstate, c)
+
+	-- add the hop & skip to the start of
+	-- each block inside this state
 	if #prog % BLOCK_LEN == 0 then
-		start_block(prog, cstate)
+		emit.seek(prog, 2)
+		emit.seek(prog, BLOCK_LEN)
 	end
 
 	-- compile
@@ -94,10 +98,6 @@ function compile_instr (prog, cstate, c)
 		cstate.buffer = 0
 		cstate.mode = "hexa"
 
-	elseif c == '(' then
-		cstate.buffer = 0
-		cstate.mode = "label"
-
 	elseif c == "'" then
 		cstate.buffer = {}
 		cstate.mode = "str"
@@ -107,7 +107,6 @@ function compile_instr (prog, cstate, c)
 		cstate.mode = "bytes"
 
 	elseif c == '}' then
-		if cstate.cond then error("unfinished condition") end
 		emit.jump(prog, cstate.root)
 		cstate.root = 0
 		cstate.mode = "body"
@@ -115,20 +114,13 @@ function compile_instr (prog, cstate, c)
 			emit.noop(prog)
 		end
 
-	elseif c == '?' then
-		if cstate.cond then error("nested condition") end
-		cstate.cond = true
-		local block_start = #prog - (#prog % BLOCK_LEN) + 1
-		local skip_dest = block_start + BLOCK_LEN + 2
-		emit.cond(prog, skip_dest)
+	elseif c == ':' then
+		cstate.buffer = 0
+		cstate.mode = "switch"
 
-	elseif c == ';' then
-		if not cstate.cond then error("free condition end") end
-		emit.jump(prog, cstate.root)
-		cstate.cond = false
-		while #prog % BLOCK_LEN ~= 0 do
-			emit.noop(prog)
-		end
+	elseif c == '?' then
+		cstate.buffer = 0
+		cstate.mode = "cond_switch"
 
 	elseif c == '+' then
 		emit.add(prog)
@@ -179,11 +171,8 @@ function compile_instr (prog, cstate, c)
 		local r = string.lower(c)
 		emit.set_reg(prog, r)
 
-	elseif 'w' <= c and c <= 'x' then
+	elseif 'w' <= c and c <= 'z' then
 		emit.get_reg(prog, c)
-
-	elseif c == '@' then
-		emit.switch(prog)
 
 	else
 		error("Invalid instruction: " .. c)
@@ -226,23 +215,6 @@ function compile_hexa (prog, cstate, c)
 		cstate.mode = 'instr'
 	else
 		error("Invalid hexadecimal: " .. c)
-	end
-end
-
-
-function compile_label (prog, cstate, c)
-	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
-	elseif c == '_' or
-			'0' <= c and c <= '9'  or
-			'A' <= c and c <= 'Z' or
-			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
-	elseif c == ')' then
-		emit.push(prog, cstate.buffer)
-		cstate.mode = 'instr'
-	else
-		error("Invalid label: " .. c)
 	end
 end
 
@@ -304,19 +276,37 @@ function compile_b_mid (prog, cstate, c)
 end
 
 
-function compile_state (prog, cstate, c)
+function compile_switch (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif c == '_' or
-			'0' <= c and c <= '9'  or
+			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
 			'a' <= c and c <= 'z' then
 		cstate.buffer = ksum(cstate.buffer, c:byte())
-	elseif c == ':' then
-		local block_start = #prog - (#prog % BLOCK_LEN) + 1
-		local skip_dest = block_start + BLOCK_LEN + 1
-		emit.enter(prog, cstate.buffer, skip_dest)
-		cstate.root = #prog
+	elseif c == '}' then
+		emit.switch(prog, cstate.buffer)
+		cstate.root = 0
+		cstate.mode = "body"
+		while #prog % BLOCK_LEN ~= 0 do
+			emit.noop(prog)
+		end
+	else
+		error("Invalid label: " .. c)
+	end
+end
+
+
+function compile_cond_switch (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == '_' or
+			'0' <= c and c <= '9' or
+			'A' <= c and c <= 'Z' or
+			'a' <= c and c <= 'z' then
+		cstate.buffer = ksum(cstate.buffer, c:byte())
+	elseif c == ';' then
+		emit.cond_switch(prog, cstate.buffer)
 		cstate.mode = 'instr'
 	else
 		error("Invalid label: " .. c)

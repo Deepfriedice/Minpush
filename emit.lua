@@ -242,24 +242,24 @@ function emit.enter (prog, label, dest)
 end
 
 
-function emit.switch (prog)
-	debug_print(#prog + 1, "switch")
+function emit.switch (prog, target)
+	debug_print(#prog + 1, "switch " .. target)
 	table.insert(prog, function (state)
-		state.label = table.remove(state.dstack)
+		state.label = target
 		state.ip = 1
 	end)
 end
 
 
-function emit.cond (prog, skip_dest)
-	debug_print(#prog + 1, "cond " .. skip_dest)
+function emit.cond_switch (prog, target)
+	debug_print(#prog + 1, "cond switch " .. target)
 	table.insert(prog, function (state)
 		local n = table.remove(state.dstack)
 		if n ~= 0 then
-			state.cond = true
-			state.ip = state.ip + 1
+			state.label = target
+			state.ip = 1
 		else
-			state.ip = skip_dest
+			state.ip = state.ip + 1
 		end
 	end)
 end
