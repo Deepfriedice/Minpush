@@ -3,49 +3,37 @@ require "emit"
 
 BLOCK_LEN = 10
 
+compile_modes = {}
+
 
 function compile (text)
 	local prog = {}
 	local cstate = {
-		mode = "body",
+		mode = "base",
 		buffer = nil,
 		root = 0
 	}
 
-	local compilers = {
-		body  = compile_body,
-		instr = compile_instr,
-		char  = compile_char,
-		deci  = compile_deci,
-		hexa  = compile_hexa,
-		str   = compile_str,
-		bytes = compile_bytes,
-		b_mid = compile_b_mid,
-		state = compile_state,
-		switch = compile_switch,
-		cond_switch = compile_cond_switch,
-	}
-
 	for i = 1, #text do
 		c = text:sub(i, i)
-		local compiler = compilers[cstate.mode]
+		local compiler = compile_modes[cstate.mode]
 		--print(c, cstate.mode)
 		compiler(prog, cstate, c)
 	end
 
-	compile_stop(prog, cstate)
+	compile_modes.finish(prog, cstate)
 
 	return prog
 end
 
 
-function compile_body (prog, cstate, c)
+function compile_modes.base (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 
 	elseif c == '{' then
 		cstate.buffer = 0
-		cstate.mode = "state"
+		cstate.mode = "state_name"
 
 	else
 		error("Invalid body command: " .. c)
@@ -53,7 +41,7 @@ function compile_body (prog, cstate, c)
 end
 
 
-function compile_state (prog, cstate, c)
+function compile_modes.state_name (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif c == '_' or
@@ -67,14 +55,14 @@ function compile_state (prog, cstate, c)
 		emit.noop(prog)  -- ensure enter will be aligned
 		emit.enter(prog, cstate.buffer, skip_dest)
 		cstate.root = #prog
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		error("Invalid label: " .. c)
 	end
 end
 
 
-function compile_instr (prog, cstate, c)
+function compile_modes.state_body (prog, cstate, c)
 
 	-- add the hop & skip to the start of
 	-- each block inside this state
@@ -88,19 +76,19 @@ function compile_instr (prog, cstate, c)
 		-- nothing
 
 	elseif c == '`' then
-		cstate.mode = "char"
+		cstate.mode = "character"
 
 	elseif c == 'd' then
 		cstate.buffer = 0
-		cstate.mode = "deci"
+		cstate.mode = "decimal"
 
 	elseif c == 'h' then
 		cstate.buffer = 0
-		cstate.mode = "hexa"
+		cstate.mode = "hexadecimal"
 
 	elseif c == "'" then
 		cstate.buffer = {}
-		cstate.mode = "str"
+		cstate.mode = "string"
 
 	elseif c == '[' then
 		cstate.buffer = {}
@@ -109,7 +97,7 @@ function compile_instr (prog, cstate, c)
 	elseif c == '}' then
 		emit.jump(prog, cstate.root)
 		cstate.root = 0
-		cstate.mode = "body"
+		cstate.mode = "base"
 		while #prog % BLOCK_LEN ~= 0 do
 			emit.noop(prog)
 		end
@@ -120,7 +108,7 @@ function compile_instr (prog, cstate, c)
 
 	elseif c == '?' then
 		cstate.buffer = 0
-		cstate.mode = "cond_switch"
+		cstate.mode = "condition"
 
 	elseif c == '+' then
 		emit.add(prog)
@@ -175,33 +163,33 @@ function compile_instr (prog, cstate, c)
 		emit.get_reg(prog, c)
 
 	else
-		error("Invalid instruction: " .. c)
+		error("Invalid state_bodyuction: " .. c)
 	end
 end
 
 
-function compile_char (prog, cstate, c)
+function compile_modes.character (prog, cstate, c)
 	local n = string.byte(c)
 	emit.push(prog, n)
-	cstate.mode = 'instr'
+	cstate.mode = 'state_body'
 end
 
 
-function compile_deci (prog, cstate, c)
+function compile_modes.decimal (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif '0' <= c and c <= '9' then
 		cstate.buffer = 10 * cstate.buffer + c:byte() - 48
 	elseif  c == 'D' then
 		emit.push(prog, cstate.buffer)
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		error("Invalid decimal: " .. c)
 	end
 end
 
 
-function compile_hexa (prog, cstate, c)
+function compile_modes.hexadecimal (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif '0' <= c and c <= '9' then
@@ -212,48 +200,48 @@ function compile_hexa (prog, cstate, c)
 		cstate.buffer = 16 * cstate.buffer + c:byte() - string.byte('a') + 10
 	elseif  c == 'H' then
 		emit.push(prog, cstate.buffer)
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		error("Invalid hexadecimal: " .. c)
 	end
 end
 
 
-function compile_str (prog, cstate, c)
+function compile_modes.string (prog, cstate, c)
 	if  c == '"' then
 		emit.push_array(prog, cstate.buffer)
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		table.insert(cstate.buffer, c:byte())
 	end
 end
 
 
-function compile_bytes (prog, cstate, c)
+function compile_modes.bytes (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif '0' <= c and c <= '9' then
 		local n = c:byte() - string.byte('0')
 		table.insert(cstate.buffer, 16 * n)
-		cstate.mode = 'b_mid'
+		cstate.mode = 'byte_complete'
 	elseif 'A' <= c and c <= 'F' then
 		local n = c:byte() - string.byte('A') + 10
 		table.insert(cstate.buffer, 16 * n)
-		cstate.mode = 'b_mid'
+		cstate.mode = 'byte_complete'
 	elseif 'a' <= c and c <= 'f' then
 		local n = c:byte() - string.byte('a') + 10
 		table.insert(cstate.buffer, 16 * n)
-		cstate.mode = 'b_mid'
+		cstate.mode = 'byte_complete'
 	elseif  c == ']' then
 		emit.push_array(prog, cstate.buffer)
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		error("Character " .. c .. " not valid in bytes")
 	end
 end
 
 
-function compile_b_mid (prog, cstate, c)
+function compile_modes.byte_complete (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif '0' <= c and c <= '9' then
@@ -276,7 +264,7 @@ function compile_b_mid (prog, cstate, c)
 end
 
 
-function compile_switch (prog, cstate, c)
+function compile_modes.switch (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif c == '_' or
@@ -287,7 +275,7 @@ function compile_switch (prog, cstate, c)
 	elseif c == '}' then
 		emit.switch(prog, cstate.buffer)
 		cstate.root = 0
-		cstate.mode = "body"
+		cstate.mode = "base"
 		while #prog % BLOCK_LEN ~= 0 do
 			emit.noop(prog)
 		end
@@ -297,7 +285,7 @@ function compile_switch (prog, cstate, c)
 end
 
 
-function compile_cond_switch (prog, cstate, c)
+function compile_modes.condition (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 	elseif c == '_' or
@@ -307,14 +295,14 @@ function compile_cond_switch (prog, cstate, c)
 		cstate.buffer = ksum(cstate.buffer, c:byte())
 	elseif c == ';' then
 		emit.cond_switch(prog, cstate.buffer)
-		cstate.mode = 'instr'
+		cstate.mode = 'state_body'
 	else
 		error("Invalid label: " .. c)
 	end
 end
 
 
-function compile_stop (prog, cstate)
+function compile_modes.finish (prog, cstate)
 	while #prog % BLOCK_LEN ~= 1 do
 		emit.noop(prog)
 	end
