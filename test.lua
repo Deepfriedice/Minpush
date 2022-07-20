@@ -39,16 +39,9 @@ function run_test (name, src, input, expected)
 	end
 end
 
-function run_all_tests ()
-	for name, test in pairs(_ENV) do
-		if name:len() > 5 and name:sub(1,5) == "test_" then
-			test()
-		end
-	end
-end
+local tests = {}
 
-
-function test_cond ()
+function tests.cond ()
 	src = [[
 		{start:
 			d0D X
@@ -63,14 +56,14 @@ function test_cond ()
 	run_test("conditions", src, input, output)
 end
 
-function test_bnot ()
+function tests.bnot ()
 	src = [[ {start: d200D ! . :stop} ]]
 	input = ""
 	output = "7"
 	run_test("binary not", src, input, output)
 end
 
-function test_byte_array ()
+function tests.byte_array ()
 	src = [[
 		{start:
 			[48 65 6c 6c 6f 20 57 6f 72 6c 64 21]
@@ -82,14 +75,14 @@ function test_byte_array ()
 	run_test("byte array", src, input, output)
 end
 
-function test_string ()
+function tests.string ()
 	src = [[ {start: 'Hello World!" _ :stop} ]]
 	input = ""
 	output = "Hello World!"
 	run_test("write string", src, input, output)
 end
 
-function test_states ()
+function tests.states ()
 	src = [[
 		{start: `Q. d1D :foo}
 		{foo:
@@ -108,7 +101,7 @@ function test_states ()
 	run_test("parity states", src, input, output)
 end
 
-function test_literals ()
+function tests.literals ()
 	src = [[
 		{ start :
 			`a .
@@ -122,7 +115,7 @@ function test_literals ()
 	run_test("literals", src, input, output)
 end
 
-function test_trim ()
+function tests.trim ()
 	src = [[
 		{start:
 			`a `b `c
@@ -137,7 +130,7 @@ function test_trim ()
 	run_test("trim & array trim", src, input, output)
 end
 
-function test_input ()
+function tests.input ()
 	src = [[ {start: i ! ?stop; . } ]]
 	input = "Hello World!"
 	output = "Hello World!"
@@ -145,4 +138,6 @@ function test_input ()
 end
 
 
-run_all_tests()
+for name, test in pairs(tests) do
+	test()
+end

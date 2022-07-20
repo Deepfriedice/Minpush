@@ -2,7 +2,7 @@ WORD_MASK = 0xffffffff
 BYTE_MASK = 0xff
 
 
-DEBUG_EMIT_PRINT = true
+DEBUG_EMIT_PRINT = false
 
 
 function debug_print(...)
