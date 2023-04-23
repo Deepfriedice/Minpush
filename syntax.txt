@@ -1,0 +1,74 @@
+ignored
+	' '
+	\n
+	\r
+	\t
+
+data literals
+	b		start binary
+	B		end binary
+	d		start decimal
+	D		end decimal
+	h		start hexadecimal
+	H		end hexadecimal
+	`		character
+	(		start label
+	)		end label
+
+array literals
+	'		start string
+	"		end string
+	[		start byte array
+	]		end byte array
+
+state
+	{		start state / label
+	:		start / end state body
+	$		state restart point
+	}		end state
+	?		start conditional switch state
+	;		end switch state
+
+registers
+	w x y z	get from register
+	W X Y Z	set to register
+
+io
+	.		write value
+	_		write array
+	i		read value	(returns byte, EOF?)
+
+stacks
+	t		trim (drop)
+	T		array trim (drop)
+	s		swap
+	S		array swap
+	c		copy (dup)
+	C		array copy
+			array concatenate
+	#		array length
+	r		rotate
+	R		array rotate
+	a		read from array
+	A		write to array
+	p		pop from top array to data stack
+	P		push from data stack to top array
+
+comparison operations
+	=		equality
+	<		less than
+	>		greater than
+
+arithmetic operations
+	~		arithmetic negate    <- why is this needed?
+	+		addition
+	-		subtraction
+	*		multiplication
+	/		division
+	%		modulo
+
+bitwise / logical operations
+	!		bitwise not
+	&		bitwise and
+	|		bitwise or
+	
