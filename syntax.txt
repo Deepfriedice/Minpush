@@ -38,21 +38,31 @@ io
 	_		write array
 	i		read value	(returns byte, EOF?)
 
-stacks
+data stack
 	t		trim (drop)
-	T		array trim (drop)
 	s		swap
-	S		array swap
 	c		copy (dup)
-	C		array copy
-			array concatenate
-	#		array length
 	r		rotate
-	R		array rotate
-	a		read from array
-	A		write to array
-	p		pop from top array to data stack
-	P		push from data stack to top array
+	R		reverse rotate
+
+array stack
+	C		clone nth array
+	T		drop nth array
+	I		insert top array in nth position
+	L		array length / nth array length ?
+
+array stack elements
+	#		array concatenate
+	S		array split at nth byte
+
+array stack transfer
+	E		big endian
+	e		little endian
+	o		byte
+	p		read from top array at offset
+	P		write to top array at offset
+	a		append to top array
+	N		create new array with value
 
 comparison operations
 	=		equality
