@@ -31,6 +31,7 @@ function emit.push (prog, n)
 	end)
 end
 
+
 function emit.push_array (prog, a)
 	debug_print(#prog + 1, "push array (" .. #a .. ")")
 	table.insert(prog, function (state)
@@ -191,6 +192,7 @@ function emit.read (prog)
 	end)
 end
 
+
 function emit.trim (prog)
 	debug_print(#prog + 1, "trim")
 	table.insert(prog, function (state)
@@ -198,6 +200,7 @@ function emit.trim (prog)
 		state.ip = state.ip + 1
 	end)
 end
+
 
 function emit.trim_array (prog)
 	debug_print(#prog + 1, "trim array")
@@ -207,6 +210,7 @@ function emit.trim_array (prog)
 		state.ip = state.ip + 1
 	end)
 end
+
 
 function emit.exit (prog)
 	debug_print(#prog + 1, "exit")
