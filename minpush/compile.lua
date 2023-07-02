@@ -163,7 +163,7 @@ function compile_modes.state_body (prog, cstate, c)
 		emit.get_reg(prog, c)
 
 	else
-		error("Invalid state_bodyuction: " .. c)
+		error("Invalid action: " .. c)
 	end
 end
 
