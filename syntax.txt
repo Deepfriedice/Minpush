@@ -4,7 +4,7 @@ ignored
 	\r
 	\t
 
-data literals
+literals
 	b		start binary
 	B		end binary
 	d		start decimal
@@ -18,8 +18,8 @@ data literals
 array literals
 	'		start string
 	"		end string
-	[		start byte array
-	]		end byte array
+	[		start byte string
+	]		end byte string
 
 state
 	{		start state / label
@@ -35,34 +35,30 @@ registers
 
 io
 	.		write value
-	_		write array
+	_		write bytes  (index count --)
 	i		read value	(returns byte, EOF?)
 
-data stack
+stack manipulation
 	t		trim (drop)
 	s		swap
 	c		copy (dup)
 	r		rotate
 	R		reverse rotate
 
-array stack
-	C		clone nth array
-	T		drop nth array
-	I		insert top array in nth position
-	L		array length / nth array length ?
+array manipulation
+	L		get array length
+	??		resize array
+	C		copy byte range
+	I		insert byte range
+	??		delete byte range
 
-array stack elements
-	#		array concatenate
-	S		array split at nth byte
-
-array stack transfer
+stack transfer
 	E		big endian
 	e		little endian
 	o		byte
-	p		read from top array at offset
-	P		write to top array at offset
-	a		append to top array
-	N		create new array with value
+	p		read from array at offset
+	P		write to array at offset
+	A		append to array
 
 comparison operations
 	=		equality
@@ -81,4 +77,3 @@ bitwise / logical operations
 	!		bitwise not
 	&		bitwise and
 	|		bitwise or
-	
