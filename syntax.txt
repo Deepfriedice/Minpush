@@ -4,46 +4,57 @@ ignored
 	\r
 	\t
 
+state
+	{		start state / label
+	:		start / end state body
+	$		state restart point
+	?		start conditional switch state
+	;		end switch state
+	}		end state
+
 literals
+	`		character
 	b		start binary
 	B		end binary
 	d		start decimal
 	D		end decimal
 	h		start hexadecimal
 	H		end hexadecimal
-	`		character
-	(		start label
-	)		end label
+
+stack manipulation
+	t		trim (drop)
+	c		copy (dup)
+	s		swap
+	r		rotate
+	R		reverse rotate
+
+arithmetic operations
+	~		arithmetic negate
+	+		addition
+	-		subtraction
+	*		multiplication
+	/		division
+	%		modulo
+
+comparison operations
+	=		equality
+	<		less than
+	>		greater than
+
+bitwise / logical operations
+	!		bitwise not
+	&		bitwise and
+	|		bitwise or
+
+registers
+	w x y z	get from register
+	W X Y Z	set to register
 
 array literals
 	'		start string
 	"		end string
 	[		start byte string
 	]		end byte string
-
-state
-	{		start state / label
-	:		start / end state body
-	$		state restart point
-	}		end state
-	?		start conditional switch state
-	;		end switch state
-
-registers
-	w x y z	get from register
-	W X Y Z	set to register
-
-io
-	.		write value
-	_		write bytes  (index count --)
-	i		read value	(returns byte, EOF?)
-
-stack manipulation
-	t		trim (drop)
-	s		swap
-	c		copy (dup)
-	r		rotate
-	R		reverse rotate
 
 array manipulation
 	L		get array length
@@ -52,7 +63,7 @@ array manipulation
 	I		insert byte range
 	??		delete byte range
 
-stack transfer
+stack-array transfer
 	E		big endian
 	e		little endian
 	o		byte
@@ -60,20 +71,7 @@ stack transfer
 	P		write to array at offset
 	A		append to array
 
-comparison operations
-	=		equality
-	<		less than
-	>		greater than
-
-arithmetic operations
-	~		arithmetic negate    <- why is this needed?
-	+		addition
-	-		subtraction
-	*		multiplication
-	/		division
-	%		modulo
-
-bitwise / logical operations
-	!		bitwise not
-	&		bitwise and
-	|		bitwise or
+io
+	i		read value	(returns byte, EOF?)
+	.		write value
+	_		write bytes  (index count --)

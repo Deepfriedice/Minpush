@@ -75,6 +75,25 @@ function compile_modes.state_body (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
 		-- nothing
 
+	elseif c == ':' then
+		cstate.buffer = 0
+		cstate.mode = "switch"
+
+	elseif c == '$' then
+		cstate.root = #prog + 1
+
+	elseif c == '?' then
+		cstate.buffer = 0
+		cstate.mode = "condition"
+
+	elseif c == '}' then
+		emit.jump(prog, cstate.root)
+		cstate.root = 0
+		cstate.mode = "base"
+		while #prog % BLOCK_LEN ~= 0 do
+			emit.noop(prog)
+		end
+
 	elseif c == '`' then
 		cstate.mode = "character"
 
@@ -86,6 +105,46 @@ function compile_modes.state_body (prog, cstate, c)
 		cstate.buffer = 0
 		cstate.mode = "hexadecimal"
 
+	elseif c == 't' then
+		emit.trim(prog)
+
+	elseif c == 'c' then
+		emit.copy(prog)
+
+	elseif c == 's' then
+		emit.swap(prog)
+
+	elseif c == '+' then
+		emit.add(prog)
+
+	elseif c == '=' then
+		emit.equal(prog)
+
+	elseif c == '<' then
+		emit.less_than(prog)
+
+	elseif c == '>' then
+		emit.greater_than(prog)
+
+	elseif c == '!' then
+		emit.bit_not(prog)
+
+	elseif 'w' <= c and c <= 'z' then
+		emit.get_reg(prog, c)
+
+	elseif 'W' <= c and c <= 'Z' then
+		local r = string.lower(c)
+		emit.set_reg(prog, r)
+
+	elseif c == 'T' then
+		emit.trim_array(prog)
+
+	elseif c == 'C' then
+		emit.array_copy(prog)
+
+	elseif c == 'S' then
+		emit.array_swap(prog)
+
 	elseif c == "'" then
 		cstate.buffer = {}
 		cstate.mode = "string"
@@ -94,36 +153,8 @@ function compile_modes.state_body (prog, cstate, c)
 		cstate.buffer = {}
 		cstate.mode = "bytes"
 
-	elseif c == '}' then
-		emit.jump(prog, cstate.root)
-		cstate.root = 0
-		cstate.mode = "base"
-		while #prog % BLOCK_LEN ~= 0 do
-			emit.noop(prog)
-		end
-
-	elseif c == ':' then
-		cstate.buffer = 0
-		cstate.mode = "switch"
-
-	elseif c == '?' then
-		cstate.buffer = 0
-		cstate.mode = "condition"
-
-	elseif c == '+' then
-		emit.add(prog)
-
-	elseif c == '=' then
-		emit.eq(prog)
-
-	elseif c == '>' then
-		emit.gt(prog)
-
-	elseif c == '<' then
-		emit.lt(prog)
-
-	elseif c == '!' then
-		emit.bnot(prog)
+	elseif c == 'i' then
+		emit.read(prog)
 
 	elseif c == '.' then
 		emit.write(prog)
@@ -131,40 +162,55 @@ function compile_modes.state_body (prog, cstate, c)
 	elseif c == '_' then
 		emit.array_write(prog)
 
-	elseif c == 'i' then
-		emit.read(prog)
-
-	elseif c == 't' then
-		emit.trim(prog)
-
-	elseif c == 'T' then
-		emit.trim_array(prog)
-
-	elseif c == 'c' then
-		emit.copy(prog)
-
-	elseif c == 'C' then
-		emit.array_copy(prog)
-
-	elseif c == 's' then
-		emit.swap(prog)
-
-	elseif c == 'S' then
-		emit.array_swap(prog)
-
-	elseif c == '$' then
-		cstate.root = #prog + 1
-
-	elseif 'W' <= c and c <= 'Z' then
-		local r = string.lower(c)
-		emit.set_reg(prog, r)
-
-	elseif 'w' <= c and c <= 'z' then
-		emit.get_reg(prog, c)
-
 	else
 		error("Invalid action: " .. c)
 	end
+end
+
+
+function compile_modes.switch (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == '_' or
+			'0' <= c and c <= '9' or
+			'A' <= c and c <= 'Z' or
+			'a' <= c and c <= 'z' then
+		cstate.buffer = ksum(cstate.buffer, c:byte())
+	elseif c == '}' then
+		emit.switch(prog, cstate.buffer)
+		cstate.root = 0
+		cstate.mode = "base"
+		while #prog % BLOCK_LEN ~= 0 do
+			emit.noop(prog)
+		end
+	else
+		error("Invalid label: " .. c)
+	end
+end
+
+
+function compile_modes.condition (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == '_' or
+			'0' <= c and c <= '9' or
+			'A' <= c and c <= 'Z' or
+			'a' <= c and c <= 'z' then
+		cstate.buffer = ksum(cstate.buffer, c:byte())
+	elseif c == ';' then
+		emit.cond_switch(prog, cstate.buffer)
+		cstate.mode = 'state_body'
+	else
+		error("Invalid label: " .. c)
+	end
+end
+
+
+function compile_modes.finish (prog, cstate)
+	while #prog % BLOCK_LEN ~= 1 do
+		emit.noop(prog)
+	end
+	emit.exit(prog)
 end
 
 
@@ -261,50 +307,4 @@ function compile_modes.byte_complete (prog, cstate, c)
 	else
 		error("Character " .. c .. " not valid in bytes")
 	end
-end
-
-
-function compile_modes.switch (prog, cstate, c)
-	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
-	elseif c == '_' or
-			'0' <= c and c <= '9' or
-			'A' <= c and c <= 'Z' or
-			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
-	elseif c == '}' then
-		emit.switch(prog, cstate.buffer)
-		cstate.root = 0
-		cstate.mode = "base"
-		while #prog % BLOCK_LEN ~= 0 do
-			emit.noop(prog)
-		end
-	else
-		error("Invalid label: " .. c)
-	end
-end
-
-
-function compile_modes.condition (prog, cstate, c)
-	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
-	elseif c == '_' or
-			'0' <= c and c <= '9' or
-			'A' <= c and c <= 'Z' or
-			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
-	elseif c == ';' then
-		emit.cond_switch(prog, cstate.buffer)
-		cstate.mode = 'state_body'
-	else
-		error("Invalid label: " .. c)
-	end
-end
-
-
-function compile_modes.finish (prog, cstate)
-	while #prog % BLOCK_LEN ~= 1 do
-		emit.noop(prog)
-	end
-	emit.exit(prog)
 end
