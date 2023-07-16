@@ -71,6 +71,15 @@ function tests.push ()
 end
 
 
+function tests.push_bytes ()
+	local args = { { 17, 18, 19, 20 } }
+	local expected = tmp_state()
+	expected.ip = 2
+	expected.array = { 17, 18, 19, 20 }
+	return run_test("push_bytes", emit.push_bytes, {}, args, tmp_state(), expected)
+end
+
+
 for name, test in pairs(tests) do
 	test()
 end
