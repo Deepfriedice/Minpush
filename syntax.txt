@@ -14,8 +14,6 @@ state
 
 literals
 	`		character
-	b		start binary
-	B		end binary
 	d		start decimal
 	D		end decimal
 	h		start hexadecimal
