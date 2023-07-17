@@ -54,6 +54,22 @@ function tests.cond ()
 end
 
 
+function tests.stack()
+	src = [[
+		{start:
+			`A `B `C t . `-.
+			`D c .. `-.
+			`E `F `G r ... `-.
+			`H `I `J R ... `-.
+			.
+		:stop}
+	]]
+	input = ""
+	output = "B-DD-EGF-IHJ-A"
+	run_test("stack manipulation", src, input, output)
+end
+
+
 function tests.bnot ()
 	src = [[ {start: d200D ! . :stop} ]]
 	input = ""

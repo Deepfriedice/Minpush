@@ -114,6 +114,12 @@ function compile_modes.state_body (prog, cstate, c)
 	elseif c == 's' then
 		emit.swap(prog)
 
+	elseif c == 'r' then
+		emit.rotate(prog)
+
+	elseif c == 'R' then
+		emit.rev_rotate(prog)
+
 	elseif c == '+' then
 		emit.add(prog)
 

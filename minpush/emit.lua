@@ -112,7 +112,32 @@ function emit.swap (prog)
 	debug_print(#prog + 1, "swap")
 	table.insert(prog, function (state)
 		local len = #state.stack
+		assert(len >= 2, "swap with less than two stack items")
 		state.stack[len - 1], state.stack[len] = state.stack[len], state.stack[len - 1]
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.rotate (prog)
+	debug_print(#prog + 1, "rotate")
+	table.insert(prog, function (state)
+		local len = #state.stack
+		assert(len >= 3, "rotate with less than three stack items")
+		local x, y, z = state.stack[len - 2], state.stack[len - 1], state.stack[len]
+		state.stack[len - 2], state.stack[len - 1], state.stack[len] = y, z, x
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.rev_rotate (prog)
+	debug_print(#prog + 1, "rev_rotate")
+	table.insert(prog, function (state)
+		local len = #state.stack
+		assert(len >= 3, "reverse rotate with less than three stack items")
+		local x, y, z = state.stack[len - 2], state.stack[len - 1], state.stack[len]
+		state.stack[len - 2], state.stack[len - 1], state.stack[len] = z, x, y
 		state.ip = state.ip + 1
 	end)
 end
