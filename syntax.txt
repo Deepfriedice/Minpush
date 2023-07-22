@@ -12,6 +12,10 @@ state
 	;		end switch state
 	}		end state
 
+comments
+	(		start comment
+	)		end comment
+
 literals
 	`		character
 	d		start decimal

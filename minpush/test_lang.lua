@@ -38,6 +38,21 @@ end
 local tests = {}
 
 
+function tests.comments ()
+	src = [[
+		This is a comment.
+		{start:
+			(A comment inside a definition.)
+			`a`b`c...
+		:stop}
+		This is another comment.
+	]]
+	input = ""
+	output = "cba"
+	run_test("comments", src, input, output)
+end
+
+
 function tests.cond ()
 	src = [[
 		{start:

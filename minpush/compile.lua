@@ -28,15 +28,11 @@ end
 
 
 function compile_modes.base (prog, cstate, c)
-	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
-
-	elseif c == '{' then
+	if c == '{' then
 		cstate.buffer = 0
 		cstate.mode = "state_name"
-
-	else
-		error("Invalid body command: " .. c)
+	elseif c == '}' then
+		error("Not inside a state.")
 	end
 end
 
@@ -93,6 +89,9 @@ function compile_modes.state_body (prog, cstate, c)
 		while #prog % BLOCK_LEN ~= 0 do
 			emit.noop(prog)
 		end
+
+	elseif c == '(' then
+		cstate.mode = "comment"
 
 	elseif c == '`' then
 		cstate.mode = "character"
@@ -217,6 +216,13 @@ function compile_modes.finish (prog, cstate)
 		emit.noop(prog)
 	end
 	emit.exit(prog)
+end
+
+
+function compile_modes.comment (prog, cstate, c)
+	if c == ')' then
+		cstate.mode = "state_body"
+	end
 end
 
 
