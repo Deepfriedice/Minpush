@@ -146,10 +146,10 @@ end
 function emit.add (prog)
 	debug_print(#prog + 1, "add")
 	table.insert(prog, function (state)
-		state.ip = state.ip + 1
-		local i = table.remove(state.stack)
 		local j = table.remove(state.stack)
+		local i = table.remove(state.stack)
 		table.insert(state.stack, i + j)
+		state.ip = state.ip + 1
 	end)
 end
 
@@ -157,9 +157,9 @@ end
 function emit.equal (prog)
 	debug_print(#prog + 1, "equal")
 	table.insert(prog, function (state)
-		local i = table.remove(state.stack)
 		local j = table.remove(state.stack)
-		if j == i then
+		local i = table.remove(state.stack)
+		if i == j then
 			table.insert(state.stack, -1)
 		else
 			table.insert(state.stack, 0)
@@ -172,9 +172,9 @@ end
 function emit.less_than (prog)
 	debug_print(#prog + 1, "less than")
 	table.insert(prog, function (state)
-		local i = table.remove(state.stack)
 		local j = table.remove(state.stack)
-		if j < i then
+		local i = table.remove(state.stack)
+		if i < j then
 			table.insert(state.stack, -1)
 		else
 			table.insert(state.stack, 0)
@@ -187,9 +187,9 @@ end
 function emit.greater_than (prog)
 	debug_print(#prog + 1, "greater than")
 	table.insert(prog, function (state)
-		local i = table.remove(state.stack)
 		local j = table.remove(state.stack)
-		if j > i then
+		local i = table.remove(state.stack)
+		if i > j then
 			table.insert(state.stack, -1)
 		else
 			table.insert(state.stack, 0)
