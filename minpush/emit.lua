@@ -143,12 +143,66 @@ function emit.rev_rotate (prog)
 end
 
 
+function emit.negate (prog)
+	debug_print(#prog + 1, "negate")
+	table.insert(prog, function (state)
+		local i = table.remove(state.stack)
+		table.insert(state.stack, -i)
+		state.ip = state.ip + 1
+	end)
+end
+
+
 function emit.add (prog)
 	debug_print(#prog + 1, "add")
 	table.insert(prog, function (state)
 		local j = table.remove(state.stack)
 		local i = table.remove(state.stack)
 		table.insert(state.stack, i + j)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.subtract (prog)
+	debug_print(#prog + 1, "subtract")
+	table.insert(prog, function (state)
+		local j = table.remove(state.stack)
+		local i = table.remove(state.stack)
+		table.insert(state.stack, i - j)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.multiply (prog)
+	debug_print(#prog + 1, "multiply")
+	table.insert(prog, function (state)
+		local j = table.remove(state.stack)
+		local i = table.remove(state.stack)
+		table.insert(state.stack, i * j)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.divide (prog)
+	debug_print(#prog + 1, "divide")
+	table.insert(prog, function (state)
+		local j = table.remove(state.stack)
+		local i = table.remove(state.stack)
+		table.insert(state.stack, i // j)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.modulo (prog)
+	debug_print(#prog + 1, "modulo")
+	table.insert(prog, function (state)
+		local j = table.remove(state.stack)
+		local i = table.remove(state.stack)
+		table.insert(state.stack, i % j)
 		state.ip = state.ip + 1
 	end)
 end

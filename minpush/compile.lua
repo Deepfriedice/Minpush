@@ -119,8 +119,23 @@ function compile_modes.state_body (prog, cstate, c)
 	elseif c == 'R' then
 		emit.rev_rotate(prog)
 
+	elseif c == '~' then
+		emit.negate(prog)
+
 	elseif c == '+' then
 		emit.add(prog)
+
+	elseif c == '-' then
+		emit.subtract(prog)
+
+	elseif c == '*' then
+		emit.multiply(prog)
+
+	elseif c == '/' then
+		emit.divide(prog)
+
+	elseif c == '%' then
+		emit.modulo(prog)
 
 	elseif c == '=' then
 		emit.equal(prog)

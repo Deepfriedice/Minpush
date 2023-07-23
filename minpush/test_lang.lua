@@ -85,6 +85,22 @@ function tests.stack()
 end
 
 
+function tests.math ()
+	src = [[
+		{start:
+			d3D d5D + `0+.     (3+5=8)
+			d7D d2D - `0+.     (7-2=5)
+			d2D d3D * `0+.     (2*3=6)
+			d8D d3D / `0+.     (8/3=2)
+			d3D ~ d5D + `0+.  (-3+5=2)
+		:stop}
+	]]
+	input = ""
+	output = "85622"
+	run_test("math operations", src, input, output)
+end
+
+
 function tests.bnot ()
 	src = [[ {start: d200D ! . :stop} ]]
 	input = ""
