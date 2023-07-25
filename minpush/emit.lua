@@ -12,6 +12,37 @@ function debug_print(...)
 end
 
 
+--[[
+	Given a function with name and arity, return an emitter which
+	produces a instruction which operates on the top arity values of the stack.
+	This is intended to simplify the simpler ~50% of instruction definitions.
+	Compare the implementations below of "emit.multiple" with "emit.divide",
+	which includes a divide-by-zero check.
+]]--
+function simple_emitter (name, arity, func)
+	return function (prog)
+		debug_print(#prog + 1, name)
+		table.insert(prog, function (state)
+			local stack_len = #state.stack
+			local first_arg = stack_len - arity + 1
+			assert(stack_len >= arity, name .. " with less than " .. arity .. " stack items")
+
+			-- take top arity values from the stack
+			local args = table.move(state.stack, first_arg, stack_len, 1, {})
+
+			-- clear used stack positions
+			table.move({}, 1, arity, first_arg, state.stack)
+
+			local result = table.pack(func(table.unpack(args)))
+
+			-- place results back onto the stack
+			table.move(result, 1, #result, #state.stack + 1, state.stack)
+			state.ip = state.ip + 1
+		end)
+	end
+end
+
+
 emit = {}
 
 
@@ -89,178 +120,92 @@ function emit.push (prog, n)
 end
 
 
-function emit.trim (prog)
-	debug_print(#prog + 1, "trim")
-	table.insert(prog, function (state)
-		table.remove(state.stack)
-		state.ip = state.ip + 1
-	end)
-end
+emit.trim = simple_emitter("trim", 1, function (x)
+end)
 
 
-function emit.copy (prog)
-	debug_print(#prog + 1, "copy")
-	table.insert(prog, function (state)
-		local tos = state.stack[#state.stack]
-		table.insert(state.stack, tos)
-		state.ip = state.ip + 1
-	end)
-end
+emit.copy = simple_emitter("copy", 1, function (x)
+	return x, x
+end)
 
 
-function emit.swap (prog)
-	debug_print(#prog + 1, "swap")
-	table.insert(prog, function (state)
-		local len = #state.stack
-		assert(len >= 2, "swap with less than two stack items")
-		state.stack[len - 1], state.stack[len] = state.stack[len], state.stack[len - 1]
-		state.ip = state.ip + 1
-	end)
-end
+emit.swap = simple_emitter("swap", 2, function (x, y)
+	return y, x
+end)
 
 
-function emit.rotate (prog)
-	debug_print(#prog + 1, "rotate")
-	table.insert(prog, function (state)
-		local len = #state.stack
-		assert(len >= 3, "rotate with less than three stack items")
-		local x, y, z = state.stack[len - 2], state.stack[len - 1], state.stack[len]
-		state.stack[len - 2], state.stack[len - 1], state.stack[len] = y, z, x
-		state.ip = state.ip + 1
-	end)
-end
+emit.rotate = simple_emitter("rotate", 3, function (x, y, z)
+	return y, z, x
+end)
 
 
-function emit.rev_rotate (prog)
-	debug_print(#prog + 1, "rev_rotate")
-	table.insert(prog, function (state)
-		local len = #state.stack
-		assert(len >= 3, "reverse rotate with less than three stack items")
-		local x, y, z = state.stack[len - 2], state.stack[len - 1], state.stack[len]
-		state.stack[len - 2], state.stack[len - 1], state.stack[len] = z, x, y
-		state.ip = state.ip + 1
-	end)
-end
+emit.rev_rotate = simple_emitter("rev_rotate", 3, function (x, y, z)
+	return z, x, y
+end)
 
 
-function emit.negate (prog)
-	debug_print(#prog + 1, "negate")
-	table.insert(prog, function (state)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, -i)
-		state.ip = state.ip + 1
-	end)
-end
+emit.negate = simple_emitter("negate", 1, function (x)
+	return -x
+end)
 
 
-function emit.add (prog)
-	debug_print(#prog + 1, "add")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, i + j)
-		state.ip = state.ip + 1
-	end)
-end
+emit.add = simple_emitter("add", 2, function (x, y)
+	return x + y
+end)
 
 
-function emit.subtract (prog)
-	debug_print(#prog + 1, "subtract")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, i - j)
-		state.ip = state.ip + 1
-	end)
-end
+emit.subtract = simple_emitter("subtract", 2, function (x, y)
+	return x - y
+end)
 
 
-function emit.multiply (prog)
-	debug_print(#prog + 1, "multiply")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, i * j)
-		state.ip = state.ip + 1
-	end)
-end
+emit.multiply = simple_emitter("multiply", 2, function (x, y)
+	return x * y
+end)
 
 
-function emit.divide (prog)
-	debug_print(#prog + 1, "divide")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, i // j)
-		state.ip = state.ip + 1
-	end)
-end
+emit.divide = simple_emitter("divide", 2, function (x, y)
+	assert(y ~= 0, "divide by zero")
+	return x // y
+end)
 
 
-function emit.modulo (prog)
-	debug_print(#prog + 1, "modulo")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		table.insert(state.stack, i % j)
-		state.ip = state.ip + 1
-	end)
-end
+emit.modulo = simple_emitter("modulo", 2, function (x, y)
+	assert(y ~= 0, "modulo by zero")
+	return x % y
+end)
 
 
-function emit.equal (prog)
-	debug_print(#prog + 1, "equal")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		if i == j then
-			table.insert(state.stack, -1)
-		else
-			table.insert(state.stack, 0)
-		end
-		state.ip = state.ip + 1
-	end)
-end
+emit.equal = simple_emitter("equal", 2, function (x, y)
+	if x == y then
+		return -1
+	else
+		return 0
+	end
+end)
 
 
-function emit.less_than (prog)
-	debug_print(#prog + 1, "less than")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		if i < j then
-			table.insert(state.stack, -1)
-		else
-			table.insert(state.stack, 0)
-		end
-		state.ip = state.ip + 1
-	end)
-end
+emit.less_than = simple_emitter("less than", 2, function (x, y)
+	if x < y then
+		return -1
+	else
+		return 0
+	end
+end)
 
 
-function emit.greater_than (prog)
-	debug_print(#prog + 1, "greater than")
-	table.insert(prog, function (state)
-		local j = table.remove(state.stack)
-		local i = table.remove(state.stack)
-		if i > j then
-			table.insert(state.stack, -1)
-		else
-			table.insert(state.stack, 0)
-		end
-		state.ip = state.ip + 1
-	end)
-end
+emit.greater_than = simple_emitter("greater than", 2, function (x, y)
+	if x > y then
+		return -1
+	else
+		return 0
+	end
+end)
 
 
-function emit.bit_not (prog)
-	debug_print(#prog + 1, "bit not")
-	table.insert(prog, function (state)
-		local len = #state.stack
-		state.stack[len] = ~state.stack[len]
-		state.ip = state.ip + 1
-	end)
-end
+emit.bit_not = simple_emitter("bit not", 1, function (x)
+	return ~x
+end)
 
 
 function emit.get_reg (prog, reg)
