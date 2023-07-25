@@ -11,25 +11,31 @@ function run_test (name, src, input, expected)
 	local output_file = io.tmpfile()
 	print("Running test: "..name)
 
-	local success, prog = pcall(compile, src)
+	local success, result = pcall(compile, src)
+	local program
 	if not success then
-		print("\tCompilation failed!")
+		print("Compilation failed!")
+		print(result)
 		return False
+	else
+		program = result
 	end
 
-	local success = pcall(run, prog, input_file, output_file)
+	local success, result = pcall(run, program, input_file, output_file)
 	if not success then
-		print("\tExecution failed!")
+		print("Execution failed!")
+		print(result)
 		return False
 	end
 
 	output_file:seek("set", 0)
 	local output = output_file:read("a")
 	if output ~= expected then
-		print("\tIncorrect output!")
+		print("Incorrect output!")
+		print("\""..output.."\"")
 		return False
 	else
-		print("\tSuccess!")
+		print("Success!")
 		return True
 	end
 end
@@ -192,4 +198,5 @@ end
 
 for name, test in pairs(tests) do
 	test()
+	print()
 end
