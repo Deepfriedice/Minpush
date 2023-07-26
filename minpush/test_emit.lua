@@ -31,23 +31,29 @@ function run_test (name, emit_func, prog, args, state, expected_state)
 	DEBUG_EMIT_PRINT = false
 	print("Running test: "..name)
 
-	if not pcall(emit_func, prog, table.unpack(args)) then
-		print("\tEmit failed!")
+	local success, result = pcall(emit_func, prog, table.unpack(args))
+	if not success then
+		print("Emit failed!")
+		print(result)
 		return False
 	end
 
 	state.ip = #prog
-	if not pcall(step, prog, state) then
-		print("\tExecution failed!")
+	local success, result = pcall(step, prog, state)
+	if not success then
+		print("Execution failed!")
+		print(result)
 		return False
 	end
 
 	if not compare_state(state, expected_state) then
-		print("\tIncorrect new state!")
+		print("Incorrect new state!")
+		print("IP:", state.ip)
+		print("stack: ", table.unpack(state.stack))
 		return False
 	end
 
-	print("\tSuccess!")
+	print("Success!")
 	return True
 end
 
@@ -82,4 +88,5 @@ end
 
 for name, test in pairs(tests) do
 	test()
+	print()
 end
