@@ -108,11 +108,17 @@ function tests.math ()
 end
 
 
-function tests.bnot ()
-	src = [[ {start: d200D ! . :stop} ]]
+function tests.bitwise ()
+	src = [[
+		{start:
+			d200D ! .
+			d92D d123D & .
+			d62D d21D | .
+		:stop}
+	]]
 	input = ""
-	output = "7"
-	run_test("binary not", src, input, output)
+	output = "7X?"
+	run_test("bitwise operations", src, input, output)
 end
 
 

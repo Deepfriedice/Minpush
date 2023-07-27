@@ -149,6 +149,12 @@ function compile_modes.state_body (prog, cstate, c)
 	elseif c == '!' then
 		emit.bit_not(prog)
 
+	elseif c == '&' then
+		emit.bit_and(prog)
+
+	elseif c == '|' then
+		emit.bit_or(prog)
+
 	elseif 'w' <= c and c <= 'z' then
 		emit.get_reg(prog, c)
 

@@ -208,6 +208,16 @@ emit.bit_not = simple_emitter("bit not", 1, function (x)
 end)
 
 
+emit.bit_and = simple_emitter("bit and", 2, function (x, y)
+	return x & y
+end)
+
+
+emit.bit_or = simple_emitter("bit or", 2, function (x, y)
+	return x | y
+end)
+
+
 function emit.get_reg (prog, reg)
 	debug_print(#prog + 1, "get " .. reg)
 	table.insert(prog, function (state)
