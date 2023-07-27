@@ -139,7 +139,7 @@ emit.rotate = simple_emitter("rotate", 3, function (x, y, z)
 end)
 
 
-emit.rev_rotate = simple_emitter("rev_rotate", 3, function (x, y, z)
+emit.rev_rotate = simple_emitter("rev rotate", 3, function (x, y, z)
 	return z, x, y
 end)
 
