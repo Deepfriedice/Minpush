@@ -357,7 +357,10 @@ function emit.array_write (prog)
 	table.insert(prog, function (state)
 		local count = table.remove(state.stack)
 		local start_index = table.remove(state.stack) + 1
-		for i = start_index, start_index + count do
+		local end_index = start_index + count - 1
+		assert(start_index >= 1, "array write from before start of array")
+		assert(end_index <= #state.array, "array write exceeds length of array")
+		for i = start_index, end_index do
 			local v = state.array[i]
 			local c = string.char(v)
 			state.output:write(c)

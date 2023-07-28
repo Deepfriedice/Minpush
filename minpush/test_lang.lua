@@ -126,7 +126,7 @@ function tests.byte_array ()
 	src = [[
 		{start:
 			[48 65 6c 6c 6f 20 57 6f 72 6c 64 21]
-			_
+			d0D d12D _
 		:stop}
 	]]
 	input = ""
@@ -136,7 +136,7 @@ end
 
 
 function tests.string ()
-	src = [[ {start: 'Hello World!" _ :stop} ]]
+	src = [[ {start: 'Hello World!" d0D d12D _ :stop} ]]
 	input = ""
 	output = "Hello World!"
 	run_test("write string", src, input, output)

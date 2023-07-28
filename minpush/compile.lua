@@ -288,7 +288,7 @@ end
 
 function compile_modes.string (prog, cstate, c)
 	if  c == '"' then
-		emit.push_array(prog, cstate.buffer)
+		emit.push_bytes(prog, cstate.buffer)
 		cstate.mode = 'state_body'
 	else
 		table.insert(cstate.buffer, c:byte())
@@ -312,7 +312,7 @@ function compile_modes.bytes (prog, cstate, c)
 		table.insert(cstate.buffer, 16 * n)
 		cstate.mode = 'byte_complete'
 	elseif  c == ']' then
-		emit.push_array(prog, cstate.buffer)
+		emit.push_bytes(prog, cstate.buffer)
 		cstate.mode = 'state_body'
 	else
 		error("Character " .. c .. " not valid in bytes")
