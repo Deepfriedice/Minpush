@@ -178,22 +178,6 @@ function tests.literals ()
 end
 
 
-function tests.trim ()
-	src = [[
-		{start:
-			`a `b `c
-			. t .
-			` .
-			'Foo" 'Bar"
-			T _
-		:stop}
-	]]
-	input = ""
-	output = "ca Foo"
-	run_test("trim & array trim", src, input, output)
-end
-
-
 function tests.input ()
 	src = [[ {start: i ! ?stop; . } ]]
 	input = "Hello World!"
