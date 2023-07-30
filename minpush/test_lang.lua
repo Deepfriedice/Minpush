@@ -59,6 +59,26 @@ function tests.comments ()
 end
 
 
+	function tests.states ()
+		src = [[
+			{start: `Q. d1D :foo}
+			{foo:
+				`W. d1D +
+				c d8D > ?baz;
+				c d4D > ?bar;
+			}
+			{bar: `E. d1D + :foo}
+			{baz:
+				`R. d1D +
+				c d10D > ?stop;
+			}
+		]]
+		input = ""
+		output = "QWWWWEWEWRR"
+		run_test("parity states", src, input, output)
+	end
+
+
 function tests.cond ()
 	src = [[
 		{start:
@@ -72,6 +92,14 @@ function tests.cond ()
 	input = ""
 	output = "0123456789"
 	run_test("conditions", src, input, output)
+end
+
+
+function tests.literals ()
+	src = [[ {start: `a. d98D. h63H. :stop} ]]
+	input = ""
+	output = "abc"
+	run_test("literals", src, input, output)
 end
 
 
@@ -122,6 +150,14 @@ function tests.bitwise ()
 end
 
 
+function tests.string ()
+	src = [[ {start: 'Hello World!" d0D d12D _ :stop} ]]
+	input = ""
+	output = "Hello World!"
+	run_test("write string", src, input, output)
+end
+
+
 function tests.byte_array ()
 	src = [[
 		{start:
@@ -132,49 +168,6 @@ function tests.byte_array ()
 	input = ""
 	output = "Hello World!"
 	run_test("byte array", src, input, output)
-end
-
-
-function tests.string ()
-	src = [[ {start: 'Hello World!" d0D d12D _ :stop} ]]
-	input = ""
-	output = "Hello World!"
-	run_test("write string", src, input, output)
-end
-
-
-function tests.states ()
-	src = [[
-		{start: `Q. d1D :foo}
-		{foo:
-			`W. d1D +
-			c d8D > ?baz;
-			c d4D > ?bar;
-		}
-		{bar: `E. d1D + :foo}
-		{baz:
-			`R. d1D +
-			c d10D > ?stop;
-		}
-	]]
-	input = ""
-	output = "QWWWWEWEWRR"
-	run_test("parity states", src, input, output)
-end
-
-
-function tests.literals ()
-	src = [[
-		{start :
-			`a .
-			d98D .
-			h63H .
-		:stop}
-	]]
-	src = [[ {start: `a. d98D. h63H. :stop} ]]
-	input = ""
-	output = "abc"
-	run_test("literals", src, input, output)
 end
 
 
