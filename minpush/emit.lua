@@ -262,6 +262,7 @@ function emit.set_array_length (prog)
 	table.insert(prog, function (state)
 		local new_length = table.remove(state.stack)
 		local old_length = #state.array
+		assert(new_length >= 0, "cannot set array to negative length")
 		for i = old_length + 1, new_length do
 			state.array[i] = 0
 		end
@@ -279,6 +280,7 @@ function emit.array_copy (prog)
 		local count = table.remove(state.stack)
 		local index = table.remove(state.stack) + 1
 		assert(index >= 1, "array copy from before start of array")
+		assert(index + count < #state.array+1, "cannot copy from past the end of array")
 		table.move(state.array, index, count, #state.array+1)
 		state.ip = state.ip + 1
 	end)
@@ -291,8 +293,10 @@ function emit.array_insert (prog)
 		local count = table.remove(state.stack)
 		local dst_index = table.remove(state.stack) + 1
 		local src_index = #state.array - count + 1
-		assert(src_index <= #state.array, "array insert from before start of array")
-		assert(dst_index <= #state.array, "array insert to before start of array")
+		assert(src_index > 0, "array insert from before start of array")
+		assert(src_index <= #state.array, "array insert from after end of array")
+		assert(dst_index > 0, "array insert to before start of array")
+		assert(dst_index <= #state.array, "array insert to after end of array")
 
 		-- copy the data to insert
 		local temp = table.move(state.array, src_index, #state.array, 1, {})
@@ -314,6 +318,7 @@ function emit.array_delete (prog)
 		local count = table.remove(state.stack)
 		local index = table.remove(state.stack) + 1
 		assert(index >= 1, "array delete from before start of array")
+		assert(index + count - 1 <= #state.array, "array delete after end of array")
 		table.move(state.array, index + count, #state.array, index)
 		for i = #state.array + 1 - count, #state.array do
 			state.array[i] = nil

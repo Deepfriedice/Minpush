@@ -162,14 +162,20 @@ function compile_modes.state_body (prog, cstate, c)
 		local r = string.lower(c)
 		emit.set_reg(prog, r)
 
-	elseif c == 'T' then
-		emit.trim_array(prog)
+	elseif c == 'L' then
+		emit.get_array_length(prog)
+
+	elseif c == 'S' then
+		emit.set_array_length(prog)
 
 	elseif c == 'C' then
 		emit.array_copy(prog)
 
-	elseif c == 'S' then
-		emit.array_swap(prog)
+	elseif c == 'I' then
+		emit.array_insert(prog)
+
+	elseif c == 'K' then
+		emit.array_delete(prog)
 
 	elseif c == "'" then
 		cstate.buffer = {}

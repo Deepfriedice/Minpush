@@ -171,6 +171,38 @@ function tests.byte_array ()
 end
 
 
+function tests.array_manipulation()
+	src = [[
+		{start:
+			      L`0+.
+			'ABC" L`0+.
+			'DEF" L`0+.
+			'GHI" L`0+.
+		:stop}
+	]]
+	input = ""
+	output = "0369"
+	run_test("array length", src, input, output)
+end
+
+
+function tests.array_manipulation()
+	src = [[
+		{start:
+			'ABCDEF"  d0DL_`-.
+			d8D     S d0DL_`-.
+			d4D     S d0DL_`-.
+			d0D d2D C d0DL_`-.
+			d0D d2D I d0DL_`-.
+			d1D d4D K d0DL_
+		:stop}
+	]]
+	input = ""
+	output = "ABCDEF-ABCDEF\0\0-ABCD-ABCDAB-ABABCD-AD"
+	run_test("array manipulation", src, input, output)
+end
+
+
 function tests.input ()
 	src = [[ {start: i ! ?stop; . } ]]
 	input = "Hello World!"

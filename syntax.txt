@@ -60,10 +60,10 @@ array literals
 
 array manipulation
 	L		get array length
-	??		resize array
+	S		resize array
 	C		copy byte range
 	I		insert byte range
-	??		delete byte range
+	K		delete byte range
 
 stack-array transfer
 	E		big endian
