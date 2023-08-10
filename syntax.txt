@@ -5,75 +5,75 @@ ignored
 	\t
 
 state
-	{		start state / label
-	:		start / end state body
-	$		state restart point
-	?		start conditional switch state
-	;		end switch state
-	}		end state
+	{						start state label
+	:						start / end state body
+	$						state restart point
+	?						start conditional state switch
+	;						end conditional state switch
+	}						end state definition
 
 comments
-	(		start comment
-	)		end comment
+	(						start comment
+	)						end comment
 
 literals
-	`		character
-	d		start decimal
-	D		end decimal
-	h		start hexadecimal
-	H		end hexadecimal
+	`						character
+	d						start decimal
+	D						end decimal
+	h						start hexadecimal
+	H						end hexadecimal
 
 stack manipulation
-	t		trim (drop)
-	c		copy (dup)
-	s		swap
-	r		rotate
-	R		reverse rotate
+	t	(x --)				trim (drop)
+	c	(x -- x x)			copy (dup)
+	s	(x y -- y x)		swap
+	r	(x y z -- y z x)	rotate
+	R	(x y z -- z x y)	reverse rotate
 
 arithmetic operations
-	~		arithmetic negate
-	+		addition
-	-		subtraction
-	*		multiplication
-	/		division
-	%		modulo
+	~	(x -- -x)			arithmetic negate
+	+	(x y -- x+y)		addition
+	-	(x y -- x-y)		subtraction
+	*	(x y -- x*y)		multiplication
+	/	(x y -- x/y)		division
+	%	(x y -- x%y)		modulo
 
 comparison operations
-	=		equality
-	<		less than
-	>		greater than
+	=	(x y -- x=y)		equality
+	<	(x y -- x<y)		less than
+	>	(x y -- x>y)		greater than
 
 bitwise / logical operations
-	!		bitwise not
-	&		bitwise and
-	|		bitwise or
+	!	(x -- !x)			bitwise not
+	&	(x y -- x&y)		bitwise and
+	|	(x y -- x|y)		bitwise or
 
 registers
-	w x y z	get from register
-	W X Y Z	set to register
+	w x y z		(-- v)		get from register
+	W X Y Z		(v --)		set to register
 
 array literals
-	'		start string
-	"		end string
-	[		start byte string
-	]		end byte string
+	'						start string
+	"						end string
+	[						start byte string
+	]						end byte string
 
 array manipulation
-	L		get array length
-	S		resize array
-	C		copy byte range
-	I		insert byte range
-	K		delete byte range
+	L	(-- v)				get array length
+	S	(n --)				resize array
+	C	(n i --)			copy byte range
+	I	(n i --)			insert byte range
+	K	(n i --)			delete byte range
 
 stack-array transfer
-	E		big endian
-	e		little endian
-	o		byte
-	p		read from array at offset
-	P		write to array at offset
-	A		append to array
+	E	(-- v)				big endian
+	e	(-- v)				little endian
+	o	(-- v)				byte
+	p	(-- v)				read from array at offset
+	P	(-- v)				write to array at offset
+	A	(-- v)				append to array
 
 io
-	i		read value	(returns byte, EOF?)
-	.		write value
-	_		write bytes  (index count --)
+	i	(-- v t)			read value	(returns byte, EOF?)
+	.	(v --)				write value
+	_	(n i --)			write bytes
