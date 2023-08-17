@@ -16,7 +16,7 @@ function run_test (name, src, input, expected)
 	if not success then
 		print("Compilation failed!")
 		print(result)
-		return False
+		return false
 	else
 		program = result
 	end
@@ -25,7 +25,7 @@ function run_test (name, src, input, expected)
 	if not success then
 		print("Execution failed!")
 		print(result)
-		return False
+		return false
 	end
 
 	output_file:seek("set", 0)
@@ -33,10 +33,10 @@ function run_test (name, src, input, expected)
 	if output ~= expected then
 		print("Incorrect output!")
 		print("\""..output.."\"")
-		return False
+		return false
 	else
 		print("Success!")
-		return True
+		return true
 	end
 end
 
@@ -45,7 +45,7 @@ local tests = {}
 
 
 function tests.comments ()
-	src = [[
+	local src = [[
 		This is a comment.
 		{start:
 			(A comment inside a definition.)
@@ -53,34 +53,34 @@ function tests.comments ()
 		:stop}
 		This is another comment.
 	]]
-	input = ""
-	output = "cba"
+	local input = ""
+	local output = "cba"
 	run_test("comments", src, input, output)
 end
 
 
-	function tests.states ()
-		src = [[
-			{start: `Q. d1D :foo}
-			{foo:
-				`W. d1D +
-				c d8D > ?baz;
-				c d4D > ?bar;
-			}
-			{bar: `E. d1D + :foo}
-			{baz:
-				`R. d1D +
-				c d10D > ?stop;
-			}
-		]]
-		input = ""
-		output = "QWWWWEWEWRR"
-		run_test("parity states", src, input, output)
-	end
+function tests.states ()
+	local src = [[
+		{start: `Q. d1D :foo}
+		{foo:
+			`W. d1D +
+			c d8D > ?baz;
+			c d4D > ?bar;
+		}
+		{bar: `E. d1D + :foo}
+		{baz:
+			`R. d1D +
+			c d10D > ?stop;
+		}
+	]]
+	local input = ""
+	local output = "QWWWWEWEWRR"
+	run_test("parity states", src, input, output)
+end
 
 
 function tests.cond ()
-	src = [[
+	local src = [[
 		{start:
 			d0D X
 			$
@@ -89,22 +89,22 @@ function tests.cond ()
 			x d1D + X
 		}
 	]]
-	input = ""
-	output = "0123456789"
+	local input = ""
+	local output = "0123456789"
 	run_test("conditions", src, input, output)
 end
 
 
 function tests.literals ()
-	src = [[ {start: `a. d98D. h63H. :stop} ]]
-	input = ""
-	output = "abc"
+	local src = [[ {start: `a. d98D. h63H. :stop} ]]
+	local input = ""
+	local output = "abc"
 	run_test("literals", src, input, output)
 end
 
 
 function tests.stack()
-	src = [[
+	local src = [[
 		{start:
 			`A `B `C t . `-.
 			`D c .. `-.
@@ -113,14 +113,14 @@ function tests.stack()
 			.
 		:stop}
 	]]
-	input = ""
-	output = "B-DD-EGF-IHJ-A"
+	local input = ""
+	local output = "B-DD-EGF-IHJ-A"
 	run_test("stack manipulation", src, input, output)
 end
 
 
 function tests.math ()
-	src = [[
+	local src = [[
 		{start:
 			d3D d5D + `0+.     (3+5=8)
 			d7D d2D - `0+.     (7-2=5)
@@ -130,49 +130,49 @@ function tests.math ()
 			d3D ~ d5D + `0+.  (-3+5=2)
 		:stop}
 	]]
-	input = ""
-	output = "856232"
+	local input = ""
+	local output = "856232"
 	run_test("math operations", src, input, output)
 end
 
 
 function tests.bitwise ()
-	src = [[
+	local src = [[
 		{start:
 			d200D ! .
 			d92D d123D & .
 			d62D d21D | .
 		:stop}
 	]]
-	input = ""
-	output = "7X?"
+	local input = ""
+	local output = "7X?"
 	run_test("bitwise operations", src, input, output)
 end
 
 
 function tests.string ()
-	src = [[ {start: 'Hello World!" d0D d12D _ :stop} ]]
-	input = ""
-	output = "Hello World!"
+	local src = [[ {start: 'Hello World!" d0D d12D _ :stop} ]]
+	local input = ""
+	local output = "Hello World!"
 	run_test("write string", src, input, output)
 end
 
 
 function tests.byte_array ()
-	src = [[
+	local src = [[
 		{start:
 			[48 65 6c 6c 6f 20 57 6f 72 6c 64 21]
 			d0D d12D _
 		:stop}
 	]]
-	input = ""
-	output = "Hello World!"
+	local input = ""
+	local output = "Hello World!"
 	run_test("byte array", src, input, output)
 end
 
 
-function tests.array_manipulation()
-	src = [[
+function tests.array_length()
+	local src = [[
 		{start:
 			      L`0+.
 			'ABC" L`0+.
@@ -180,14 +180,14 @@ function tests.array_manipulation()
 			'GHI" L`0+.
 		:stop}
 	]]
-	input = ""
-	output = "0369"
+	local input = ""
+	local output = "0369"
 	run_test("array length", src, input, output)
 end
 
 
 function tests.array_manipulation()
-	src = [[
+	local src = [[
 		{start:
 			'ABCDEF"  d0DL_`-.
 			d8D     S d0DL_`-.
@@ -197,16 +197,16 @@ function tests.array_manipulation()
 			d1D d4D K d0DL_
 		:stop}
 	]]
-	input = ""
-	output = "ABCDEF-ABCDEF\0\0-ABCD-ABCDAB-ABABCD-AD"
+	local input = ""
+	local output = "ABCDEF-ABCDEF\0\0-ABCD-ABCDAB-ABABCD-AD"
 	run_test("array manipulation", src, input, output)
 end
 
 
 function tests.input ()
-	src = [[ {start: i ! ?stop; . } ]]
-	input = "Hello World!"
-	output = "Hello World!"
+	local src = [[ {start: i ! ?stop; . } ]]
+	local input = "Hello World!"
+	local output = "Hello World!"
 	run_test("cat", src, input, output)
 end
 

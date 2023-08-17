@@ -35,7 +35,7 @@ function run_test (name, emit_func, prog, args, state, expected_state)
 	if not success then
 		print("Emit failed!")
 		print(result)
-		return False
+		return false
 	end
 
 	state.ip = #prog
@@ -43,18 +43,18 @@ function run_test (name, emit_func, prog, args, state, expected_state)
 	if not success then
 		print("Execution failed!")
 		print(result)
-		return False
+		return false
 	end
 
 	if not compare_state(state, expected_state) then
 		print("Incorrect new state!")
 		print("IP:", state.ip)
 		print("stack: ", table.unpack(state.stack))
-		return False
+		return false
 	end
 
 	print("Success!")
-	return True
+	return true
 end
 
 
