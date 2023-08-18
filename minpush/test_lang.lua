@@ -189,11 +189,11 @@ end
 function tests.array_manipulation()
 	local src = [[
 		{start:
-			'ABCDEF"  d0DL_`-.
-			d8D     S d0DL_`-.
-			d4D     S d0DL_`-.
-			d0D d2D C d0DL_`-.
-			d0D d2D I d0DL_`-.
+			'ABCDEF"  d0DL_ `-.
+			d8D     S d0DL_ `-.
+			d4D     S d0DL_ `-.
+			d0D d2D C d0DL_ `-.
+			d0D d2D I d0DL_ `-.
 			d1D d4D K d0DL_
 		:stop}
 	]]
