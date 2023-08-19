@@ -162,6 +162,14 @@ function compile_modes.state_body (prog, cstate, c)
 		local r = string.lower(c)
 		emit.set_reg(prog, r)
 
+	elseif c == "'" then
+		cstate.buffer = {}
+		cstate.mode = "string"
+
+	elseif c == '[' then
+		cstate.buffer = {}
+		cstate.mode = "bytes"
+
 	elseif c == 'L' then
 		emit.get_array_length(prog)
 
@@ -176,14 +184,6 @@ function compile_modes.state_body (prog, cstate, c)
 
 	elseif c == 'K' then
 		emit.array_delete(prog)
-
-	elseif c == "'" then
-		cstate.buffer = {}
-		cstate.mode = "string"
-
-	elseif c == '[' then
-		cstate.buffer = {}
-		cstate.mode = "bytes"
 
 	elseif c == 'i' then
 		emit.read(prog)
