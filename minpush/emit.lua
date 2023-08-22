@@ -328,6 +328,68 @@ function emit.array_delete (prog)
 end
 
 
+local function get_endian_shifts(size)
+	if size == "byte" then
+		return { 0*8 }
+	elseif size == "be word" then
+		return { 3*8, 2*8, 1*8, 0*8 }
+	elseif size == "le word" then
+		return { 0*8, 1*8, 2*8, 3*8 }
+	else
+		error("invalid transfer size")
+	end
+end
+
+
+function emit.array_peek (prog, size)
+	debug_print(#prog + 1, "array peek", size)
+	local shifts = get_endian_shifts(size)
+	table.insert(prog, function (state)
+		local index = table.remove(state.stack) + 1
+		assert(index >= 1, "array peek from before start of array")
+		assert(index + #shifts - 1 <= #state.array, "array peek after end of array")
+		local value = 0
+		for position, shift in ipairs(shifts) do
+			local byte_value = state.array[index+position-1]
+			value = value + (byte_value << shift)
+		end
+		table.insert(state.stack, value)
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.array_poke (prog, size)
+	debug_print(#prog + 1, "array poke", size)
+	local shifts = get_endian_shifts(size)
+	table.insert(prog, function (state)
+		local index = table.remove(state.stack) + 1
+		local value = table.remove(state.stack)
+		assert(index >= 1, "array poke from before start of array")
+		assert(index + #shifts - 1 <= #state.array, "array poke after end of array")
+		for position, shift in ipairs(shifts) do
+			local byte_value = (value >> shift) & 0xFF
+			state.array[index+position-1] = byte_value
+		end
+		state.ip = state.ip + 1
+	end)
+end
+
+
+function emit.array_append (prog, size)
+	debug_print(#prog + 1, "array append", size)
+	local shifts = get_endian_shifts(size)
+	table.insert(prog, function (state)
+		local value = table.remove(state.stack)
+		for position, shift in ipairs(shifts) do
+			local byte_value = (value >> shift) & 0xFF
+			table.insert(state.array, byte_value)
+		end
+		state.ip = state.ip + 1
+	end)
+end
+
+
 function emit.read (prog)
 	debug_print(#prog + 1, "read")
 	table.insert(prog, function (state)

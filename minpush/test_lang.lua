@@ -203,6 +203,56 @@ function tests.array_manipulation()
 end
 
 
+function tests.array_peek()
+	local src = [[
+		{start:
+			'ABCDEF"             (literal string)
+			d3D op `D =          (peek at byte 3)
+			d1D Ep h42434445H =  (peek at bytes 1,2,3,4)
+			d1D ep h45444342H =  (peek at bytes 1,2,3,4 reversed)
+			& & ?pass;
+		:fail}
+		{pass: 'PASS" d6D d4D _ :stop}
+		{fail: 'FAIL" d6D d4D _ :stop}
+	]]
+	local input = ""
+	local output = "PASS"
+	run_test("array peek", src, input, output)
+end
+
+
+function tests.array_poke()
+	local src = [[
+		{start:
+			'---------"        (literal string)
+			`E d4D oP          (poke "E" to byte 4)
+			h41424344H d0D EP  (poke ABCD to bytes 0-3)
+			h49484746H d5D eP  (poke FGHI to bytes 5-7 reversed)
+			d0DL_
+		:stop}
+	]]
+	local input = ""
+	local output = "ABCDEFGHI"
+	run_test("array poke", src, input, output)
+end
+
+
+function tests.array_append()
+	local src = [[
+		{start:
+			'A"            (literal A)
+			`B oA          (append B)
+			h43444546H EA  (append CDEF)
+			h4a494847H eA  (append JIHG reversed)
+			d0DL_
+		:stop}
+	]]
+	local input = ""
+	local output = "ABCDEFGHIJ"
+	run_test("array append", src, input, output)
+end
+
+
 function tests.input ()
 	local src = [[ {start: i ! ?stop; . } ]]
 	local input = "Hello World!"

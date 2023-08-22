@@ -185,6 +185,15 @@ function compile_modes.state_body (prog, cstate, c)
 	elseif c == 'K' then
 		emit.array_delete(prog)
 
+	elseif c == 'o' then
+		cstate.mode = "transfer_byte"
+
+	elseif c == 'E' then
+		cstate.mode = "transfer_be_word"
+
+	elseif c == 'e' then
+		cstate.mode = "transfer_le_word"
+
 	elseif c == 'i' then
 		emit.read(prog)
 
@@ -323,6 +332,54 @@ function compile_modes.bytes (prog, cstate, c)
 	else
 		error("Character " .. c .. " not valid in bytes")
 	end
+end
+
+
+function compile_modes.transfer_byte (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == 'p' then
+		emit.array_peek(prog, "byte")
+	elseif c == 'P' then
+		emit.array_poke(prog, "byte")
+	elseif c == 'A' then
+		emit.array_append(prog, "byte")
+	else
+		error("Invalid label: " .. c)
+	end
+	cstate.mode = 'state_body'
+end
+
+
+function compile_modes.transfer_be_word (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == 'p' then
+		emit.array_peek(prog, "be word")
+	elseif c == 'P' then
+		emit.array_poke(prog, "be word")
+	elseif c == 'A' then
+		emit.array_append(prog, "be word")
+	else
+		error("Invalid label: " .. c)
+	end
+	cstate.mode = 'state_body'
+end
+
+
+function compile_modes.transfer_le_word (prog, cstate, c)
+	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
+		-- nothing
+	elseif c == 'p' then
+		emit.array_peek(prog, "le word")
+	elseif c == 'P' then
+		emit.array_poke(prog, "le word")
+	elseif c == 'A' then
+		emit.array_append(prog, "le word")
+	else
+		error("Invalid label: " .. c)
+	end
+	cstate.mode = 'state_body'
 end
 
 

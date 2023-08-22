@@ -66,12 +66,12 @@ array manipulation
 	K	(i n --)			delete byte range
 
 stack-array transfer
-	E	(-- v)				big endian
-	e	(-- v)				little endian
-	o	(-- v)				byte
-	p	(-- v)				read from array at offset
-	P	(-- v)				write to array at offset
-	A	(-- v)				append to array
+	o	 					byte
+	E	 					big endian
+	e	 					little endian
+	p	(i -- v)			peek / read from array at offset
+	P	(v i --)			poke / write to array at offset
+	A	(v --)				append to array
 
 io
 	i	(-- v t)			read value	(returns byte, EOF?)

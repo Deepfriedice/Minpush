@@ -86,6 +86,22 @@ function tests.push_bytes ()
 end
 
 
+function tests.array_peek_be ()
+	local array = { 45, 22, 0, 100 }
+	local be_value = (array[1]<<24) + (array[2]<<16) + (array[3]<<8) + (array[4]<<0)
+	local args = { "be word" }
+	local initial_state = tmp_state()
+	initial_state.ip = 1
+	initial_state.stack = { 0 }
+	initial_state.array = array
+	local expected_state = tmp_state()
+	expected_state.ip = 2
+	expected_state.stack = { be_value }
+	expected_state.array = array
+	return run_test("array_peek_be", emit.array_peek, {}, args, initial_state, expected_state)
+end
+
+
 for name, test in pairs(tests) do
 	test()
 	print()
