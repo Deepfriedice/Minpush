@@ -5,7 +5,7 @@ BYTE_MASK = 0xff
 DEBUG_EMIT_PRINT = false
 
 
-function debug_print(...)
+local function debug_print(...)
 	if DEBUG_EMIT_PRINT then
 		print(...)
 	end
@@ -19,7 +19,7 @@ end
 	Compare the implementations below of "emit.multiple" with "emit.divide",
 	which includes a divide-by-zero check.
 ]]--
-function simple_emitter (name, arity, func)
+local function simple_emitter (name, arity, func)
 	return function (prog)
 		debug_print(#prog + 1, name)
 		table.insert(prog, function (state)

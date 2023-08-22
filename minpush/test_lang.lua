@@ -2,7 +2,7 @@ require "compile"
 require "run"
 
 
-function run_test (name, src, input, expected)
+local function run_test (name, src, input, expected)
 	DEBUG_EMIT_PRINT = false
 	BLOCK_LEN = 5
 	local input_file = io.tmpfile()

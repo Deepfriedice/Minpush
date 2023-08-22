@@ -3,13 +3,13 @@ require "emit"
 require "run"
 
 
-function tmp_state ()
+local function tmp_state ()
 	-- Don't need IO for these tests
 	return new_state(io.tmpfile(), io.tmpfile())
 end
 
 
-function compare_state (actual, expected)
+local function compare_state (actual, expected)
 	-- Compare a state table, ignoring the input and output handles
 	for key in pairs(expected) do
 		if actual[key] == nil then
@@ -27,7 +27,7 @@ function compare_state (actual, expected)
 end
 
 
-function run_test (name, emit_func, prog, args, state, expected_state)
+local function run_test (name, emit_func, prog, args, state, expected_state)
 	DEBUG_EMIT_PRINT = false
 	print("Running test: "..name)
 
