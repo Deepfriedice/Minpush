@@ -61,9 +61,9 @@ array literals
 array manipulation
 	L	(-- v)				get array length
 	S	(n --)				resize array
-	C	(n i --)			copy byte range
-	I	(n i --)			insert byte range
-	K	(n i --)			delete byte range
+	C	(i n --)			copy byte range
+	I	(i n --)			insert byte range
+	K	(i n --)			delete byte range
 
 stack-array transfer
 	E	(-- v)				big endian
@@ -76,4 +76,4 @@ stack-array transfer
 io
 	i	(-- v t)			read value	(returns byte, EOF?)
 	.	(v --)				write value
-	_	(n i --)			write bytes
+	_	(i n --)			write bytes
