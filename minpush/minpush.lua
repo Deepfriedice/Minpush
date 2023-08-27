@@ -1,14 +1,14 @@
 require "compile"
 require "run"
 
-filename = assert(arg[1], "No program!")
-src_file = assert(io.open(filename), "Cannot open: "..filename)
-text = src_file:read("a")
+local filename = assert(arg[1], "No program!")
+local src_file = assert(io.open(filename), "Cannot open: "..filename)
+local text = src_file:read("a")
 src_file:close()
 
 print("compiling...")
 
-prog = compile(text)
+local prog = compile(text)
 
 print("running...")
 

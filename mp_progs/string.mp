@@ -1,5 +1,5 @@
 { start :
-	'Hello World!" _
+	'Hello World!"
+	d0D d12D _
 	haH.
-	: stop
-}
+: stop }

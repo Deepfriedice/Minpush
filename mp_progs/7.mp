@@ -1,4 +1,1 @@
-{ start :
-	d200D ! .
-	haH.
-}
+{start: d200D ! . haH. :stop}

@@ -7,7 +7,7 @@ compile_modes = {}
 
 
 function compile (text)
-	local prog = {}
+	prog = {}
 	local cstate = {
 		mode = "base",
 		buffer = nil,
@@ -15,7 +15,7 @@ function compile (text)
 	}
 
 	for i = 1, #text do
-		c = text:sub(i, i)
+		local c = text:sub(i, i)
 		local compiler = compile_modes[cstate.mode]
 		--print(c, cstate.mode)
 		compiler(prog, cstate, c)
