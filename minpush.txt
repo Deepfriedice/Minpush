@@ -1,0 +1,110 @@
+language
+	parsed a character at a time
+	built around push-down autonoma
+	stack-based operations
+		general format of "value index count operation"
+
+state
+	data stack of i32's
+	general purpose registers (4 * i32)
+	array of bytes
+
+unsure if any kind of extension mechanism should be included
+	how would it be invoked?
+	probably have to use subroutines with a known-location return addr, rather than stack push function calls
+		all function aren't re-entrant, I don't care
+	Just do text insertion?
+
+characters have an action and/or change compiler state
+	need to switch into and outof each state
+
+avoid overloading?
+	interpretation of digits needs to be context-sensitive
+		h10H != d10D != b10B != '10"
+		strings -> every char is actually context-sensitive
+
+literals
+	binary		b1100B
+	decimal		d12D
+	hex			h0aH
+	char		`M
+	string		'Hello World!"
+	bytes		[4e501f]
+
+NEW PLAN
+	Get rid of conditionals
+	Use conditional state changes instead
+	Syntax
+		?blah; is a conditional state change.
+		:blah} is a unconditional state change,
+			and replaces the normal looping behaviour.
+	Example
+		{foo:
+			actions
+			c `a = ?one;
+			c `b = ?two;
+		}
+		{bar:
+			actions
+			c `c = ?three;
+		:otherwise}
+	This avoids the need for "double jumps".
+	Remove labels
+		They're only used for specifying jump targets anyway.
+	Syntax characters
+		()?;@ are freed up
+		?foo; seems okay
+			(foo) was more readable
+		I'm not sure how to use ()
+			comments!
+		{start: `H. :stop} is nice.
+	block structure
+		start of state
+			nop
+			state test + skip
+			body
+		continuation
+			hop
+			skip
+			body
+
+Array
+	Replaces the array stack
+	Easier to treat as array (index from front) than a stack
+	get length
+	set length
+		combines:
+			reduce length / truncate n
+			increase length / pad n (fills with 0x00)
+		can do relative changes as "getlength 1 - setlength"
+	copy bytes
+		copy from somewhere in the array to the end of the array
+	insert bytes
+		move data from end-of-array into he middle
+	remove bytes
+		delete data from the middle
+	array write
+		write everything?					no
+		write after some index				okay
+		write a range						awkward
+		write from an index for some count	yes
+	transfers
+		Two character instructions. Implemented via a "transfer" state.
+			<size> enters the transfer state
+			<type> exits the transfer state
+			I know that seems backwards, but this simplifies the transfer
+		hDeadBeefH d12D <insert> <big endian> will write 3735928559
+		in big-endian to bytes 12-16 of the top array
+		sizes
+			byte
+			little endian word
+			big endian word
+		types:
+			read (offset -- value)
+			write (value offset --)
+			append (value --)
+		read and write need to check length is valid
+
+comments
+	All text outside a state definition other than "{" and "}" is considered a comment.
+	Inside a state definition, "(" enters a comment, and ")" leaves it.
