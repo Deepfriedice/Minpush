@@ -1,5 +1,7 @@
+Example "cat" program.
+
 { start :
-	i
-	! ?stop;
-	.
+	i            (read a byte)
+	! ?stop;     (stop on EOF)
+	.            (write the byte back)
 }

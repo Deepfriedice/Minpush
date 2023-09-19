@@ -1,3 +1,6 @@
+Print the decimal representation of a number.
+
+
 { start :
   d47043D X
 : split_x }
@@ -11,10 +14,8 @@
 }
 
 { print_x :
-  L d0D = ?done;     (stop when there are no more digits)
+  L d0D = ?stop;     (stop when there are no more digits)
   L d1D - op         (peek the last byte of the array)
   L d1D - S          (shorten the array by one)
   `0 + .             (print the character)
 }
-
-{done: haH. :stop}

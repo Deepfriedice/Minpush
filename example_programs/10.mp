@@ -1,3 +1,5 @@
+Print the numbers 0 to 9.
+
 { start :
 	d0D X
 	$
