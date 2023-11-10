@@ -17,7 +17,6 @@ function compile (text)
 	for i = 1, #text do
 		local c = text:sub(i, i)
 		local compiler = compile_modes[cstate.mode]
-		--print(c, cstate.mode)
 		compiler(prog, cstate, c)
 	end
 
@@ -39,7 +38,7 @@ end
 
 function compile_modes.state_name (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == '_' or
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
@@ -69,7 +68,7 @@ function compile_modes.state_body (prog, cstate, c)
 
 	-- compile
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 
 	elseif c == ':' then
 		cstate.buffer = 0
@@ -211,7 +210,7 @@ end
 
 function compile_modes.switch (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == '_' or
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
@@ -232,7 +231,7 @@ end
 
 function compile_modes.condition (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == '_' or
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
@@ -271,7 +270,7 @@ end
 
 function compile_modes.decimal (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif '0' <= c and c <= '9' then
 		cstate.buffer = 10 * cstate.buffer + c:byte() - 48
 	elseif  c == 'D' then
@@ -285,7 +284,7 @@ end
 
 function compile_modes.hexadecimal (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif '0' <= c and c <= '9' then
 		cstate.buffer = 16 * cstate.buffer + c:byte() - string.byte('0')
 	elseif 'A' <= c and c <= 'F' then
@@ -313,7 +312,7 @@ end
 
 function compile_modes.bytes (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif '0' <= c and c <= '9' then
 		local n = c:byte() - string.byte('0')
 		table.insert(cstate.buffer, 16 * n)
@@ -337,7 +336,7 @@ end
 
 function compile_modes.transfer_byte (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == 'p' then
 		emit.array_peek(prog, "byte")
 	elseif c == 'P' then
@@ -353,7 +352,7 @@ end
 
 function compile_modes.transfer_be_word (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == 'p' then
 		emit.array_peek(prog, "be word")
 	elseif c == 'P' then
@@ -369,7 +368,7 @@ end
 
 function compile_modes.transfer_le_word (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif c == 'p' then
 		emit.array_peek(prog, "le word")
 	elseif c == 'P' then
@@ -385,7 +384,7 @@ end
 
 function compile_modes.byte_complete (prog, cstate, c)
 	if c == ' ' or c == '\n' or c == '\r' or c == '\t' then
-		-- nothing
+		-- do nothing
 	elseif '0' <= c and c <= '9' then
 		local n = c:byte() - string.byte('0')
 		cstate.buffer[#cstate.buffer] = cstate.buffer[#cstate.buffer] + n

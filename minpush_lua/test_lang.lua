@@ -21,7 +21,7 @@ local function run_test (name, src, input, expected)
 		program = result
 	end
 
-	local success, result = pcall(run, program, input_file, output_file)
+	success, result = pcall(run, program, input_file, output_file)
 	if not success then
 		print("Execution failed!")
 		print(result)

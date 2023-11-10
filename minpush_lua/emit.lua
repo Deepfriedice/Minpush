@@ -1,7 +1,3 @@
-WORD_MASK = 0xffffffff
-BYTE_MASK = 0xff
-
-
 DEBUG_EMIT_PRINT = false
 
 
@@ -16,29 +12,33 @@ end
 	Given a function with name and arity, return an emitter which
 	produces a instruction which operates on the top arity values of the stack.
 	This is intended to simplify the simpler ~50% of instruction definitions.
-	Compare the implementations below of "emit.multiple" with "emit.divide",
-	which includes a divide-by-zero check.
+	Compare the implementations below of "emit.multiple" with "emit.get_reg",
+	which needs to access the current state.
 ]]--
 local function simple_emitter (name, arity, func)
+	local function wrapped (state)
+		local stack_len = #state.stack
+		local first_arg = stack_len - arity + 1
+		assert(stack_len >= arity, name .. " with less than " .. arity .. " stack items")
+
+		-- take top arity values from the stack
+		local args = table.move(state.stack, first_arg, stack_len, 1, {})
+
+		-- clear used stack positions
+		table.move({}, 1, arity, first_arg, state.stack)
+
+		-- call the wrapped function
+		local result = table.pack(func(table.unpack(args)))
+
+		-- place results back onto the stack
+		table.move(result, 1, #result, #state.stack + 1, state.stack)
+		state.ip = state.ip + 1
+	end
+
+	-- return the new emitter
 	return function (prog)
 		debug_print(#prog + 1, name)
-		table.insert(prog, function (state)
-			local stack_len = #state.stack
-			local first_arg = stack_len - arity + 1
-			assert(stack_len >= arity, name .. " with less than " .. arity .. " stack items")
-
-			-- take top arity values from the stack
-			local args = table.move(state.stack, first_arg, stack_len, 1, {})
-
-			-- clear used stack positions
-			table.move({}, 1, arity, first_arg, state.stack)
-
-			local result = table.pack(func(table.unpack(args)))
-
-			-- place results back onto the stack
-			table.move(result, 1, #result, #state.stack + 1, state.stack)
-			state.ip = state.ip + 1
-		end)
+		table.insert(prog, wrapped)
 	end
 end
 
@@ -241,7 +241,7 @@ end
 function emit.push_bytes (prog, bytes)
 	debug_print(#prog + 1, "push bytes (" .. #bytes .. ")")
 	table.insert(prog, function (state)
-		--append bytes onto the array
+		-- append bytes onto the array
 		table.move(bytes, 1, #bytes, #state.array+1, state.array)
 		state.ip = state.ip + 1
 	end)
@@ -411,7 +411,7 @@ function emit.write (prog)
 	debug_print(#prog + 1, "write")
 	table.insert(prog, function (state)
 		local n = table.remove(state.stack)
-		n = n & BYTE_MASK
+		n = n & 0xFF  -- only use the bottom byte
 		local c = string.char(n)
 		state.output:write(c)
 		state.ip = state.ip + 1

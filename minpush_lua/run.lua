@@ -1,6 +1,9 @@
 require "ksum"
 
 
+local start_label = ksum_text("start")
+
+
 function new_state (input, output)
 	if input == nil then
 		input = io.input()
@@ -15,7 +18,7 @@ function new_state (input, output)
 		running = true,
 		stack = {},
 		array = {},
-		label = ksum_text("start"),
+		label = start_label,
 		reg = { w = 0, x = 0, y = 0, z = 0 },
 	}
 end

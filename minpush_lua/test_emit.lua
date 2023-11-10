@@ -39,7 +39,7 @@ local function run_test (name, emit_func, prog, args, state, expected_state)
 	end
 
 	state.ip = #prog
-	local success, result = pcall(step, prog, state)
+	success, result = pcall(step, prog, state)
 	if not success then
 		print("Execution failed!")
 		print(result)
