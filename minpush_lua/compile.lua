@@ -1,13 +1,13 @@
-require "ksum"
-require "emit"
-
-BLOCK_LEN = 10
-
-compile_modes = {}
+local ksum = require "ksum"
+local emit = require "emit"
 
 
-function compile (text)
-	prog = {}
+local compile = {block_len = 10}
+local compile_modes = {}
+
+
+function compile.compile (text)
+	local prog = {}
 	local cstate = {
 		mode = "base",
 		buffer = nil,
@@ -43,10 +43,10 @@ function compile_modes.state_name (prog, cstate, c)
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
 			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
+		cstate.buffer = ksum.ksum(cstate.buffer, c:byte())
 	elseif c == ':' then
-		local block_start = #prog - (#prog % BLOCK_LEN) + 1
-		local skip_dest = block_start + BLOCK_LEN + 1
+		local block_start = #prog - (#prog % compile.block_len) + 1
+		local skip_dest = block_start + compile.block_len + 1
 		emit.noop(prog)  -- ensure enter will be aligned
 		emit.enter(prog, cstate.buffer, skip_dest)
 		cstate.root = #prog
@@ -61,9 +61,9 @@ function compile_modes.state_body (prog, cstate, c)
 
 	-- add the hop & skip to the start of
 	-- each block inside this state
-	if #prog % BLOCK_LEN == 0 then
+	if #prog % compile.block_len == 0 then
 		emit.seek(prog, 2)
-		emit.seek(prog, BLOCK_LEN)
+		emit.seek(prog, compile.block_len)
 	end
 
 	-- compile
@@ -85,7 +85,7 @@ function compile_modes.state_body (prog, cstate, c)
 		emit.jump(prog, cstate.root)
 		cstate.root = 0
 		cstate.mode = "base"
-		while #prog % BLOCK_LEN ~= 0 do
+		while #prog % compile.block_len ~= 0 do
 			emit.noop(prog)
 		end
 
@@ -215,12 +215,12 @@ function compile_modes.switch (prog, cstate, c)
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
 			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
+		cstate.buffer = ksum.ksum(cstate.buffer, c:byte())
 	elseif c == '}' then
 		emit.switch(prog, cstate.buffer)
 		cstate.root = 0
 		cstate.mode = "base"
-		while #prog % BLOCK_LEN ~= 0 do
+		while #prog % compile.block_len ~= 0 do
 			emit.noop(prog)
 		end
 	else
@@ -236,7 +236,7 @@ function compile_modes.condition (prog, cstate, c)
 			'0' <= c and c <= '9' or
 			'A' <= c and c <= 'Z' or
 			'a' <= c and c <= 'z' then
-		cstate.buffer = ksum(cstate.buffer, c:byte())
+		cstate.buffer = ksum.ksum(cstate.buffer, c:byte())
 	elseif c == ';' then
 		emit.cond_switch(prog, cstate.buffer)
 		cstate.mode = 'state_body'
@@ -247,7 +247,7 @@ end
 
 
 function compile_modes.finish (prog, cstate)
-	while #prog % BLOCK_LEN ~= 1 do
+	while #prog % compile.block_len ~= 1 do
 		emit.noop(prog)
 	end
 	emit.exit(prog)
@@ -403,3 +403,6 @@ function compile_modes.byte_complete (prog, cstate, c)
 		error("Character " .. c .. " not valid in bytes")
 	end
 end
+
+
+return compile

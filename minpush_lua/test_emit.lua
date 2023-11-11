@@ -1,11 +1,11 @@
-require "compare"
-require "emit"
-require "run"
+local compare = require "compare"
+local emit = require "emit"
+local run = require "run"
 
 
 local function tmp_state ()
 	-- Don't need IO for these tests
-	return new_state(io.tmpfile(), io.tmpfile())
+	return run.new_state(io.tmpfile(), io.tmpfile())
 end
 
 
@@ -39,7 +39,7 @@ local function run_test (name, emit_func, prog, args, state, expected_state)
 	end
 
 	state.ip = #prog
-	success, result = pcall(step, prog, state)
+	success, result = pcall(run.step, prog, state)
 	if not success then
 		print("Execution failed!")
 		print(result)

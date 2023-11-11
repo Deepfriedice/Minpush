@@ -1,8 +1,8 @@
-DEBUG_EMIT_PRINT = false
+local emit = {debug = false}
 
 
 local function debug_print(...)
-	if DEBUG_EMIT_PRINT then
+	if emit.debug then
 		print(...)
 	end
 end
@@ -41,9 +41,6 @@ local function simple_emitter (name, arity, func)
 		table.insert(prog, wrapped)
 	end
 end
-
-
-emit = {}
 
 
 function emit.noop (prog)
@@ -435,3 +432,6 @@ function emit.array_write (prog)
 		state.ip = state.ip + 1
 	end)
 end
+
+
+return emit

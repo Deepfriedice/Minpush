@@ -1,10 +1,11 @@
-require "ksum"
+local ksum = require "ksum"
 
 
-local start_label = ksum_text("start")
+local run = {}
+local start_label = ksum.ksum_text("start")
 
 
-function new_state (input, output)
+function run.new_state (input, output)
 	if input == nil then
 		input = io.input()
 	end
@@ -24,7 +25,7 @@ function new_state (input, output)
 end
 
 
-function step(prog, state)
+function run.step(prog, state)
 	local ip = state.ip
 	assert(ip <= #prog, "out of bounds: " .. ip)
 	local operation = prog[ip]
@@ -32,9 +33,12 @@ function step(prog, state)
 end
 
 
-function run(prog, input, output)
-	local state = new_state(input, output)
+function run.execute(prog, input, output)
+	local state = run.new_state(input, output)
 	while state.running do
-		step(prog, state)
+		run.step(prog, state)
 	end
 end
+
+
+return run

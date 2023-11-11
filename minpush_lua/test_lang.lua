@@ -1,17 +1,18 @@
-require "compile"
-require "run"
+local emit = require "emit"
+local compile = require "compile"
+local run = require "run"
 
 
 local function run_test (name, src, input, expected)
-	DEBUG_EMIT_PRINT = false
-	BLOCK_LEN = 5
+	emit.debug = false
+	compile.block_len = 5
 	local input_file = io.tmpfile()
 	input_file:write(input)
 	input_file:seek("set", 0)
 	local output_file = io.tmpfile()
 	print("Running test: "..name)
 
-	local success, result = pcall(compile, src)
+	local success, result = pcall(compile.compile, src)
 	local program
 	if not success then
 		print("Compilation failed!")
@@ -21,7 +22,7 @@ local function run_test (name, src, input, expected)
 		program = result
 	end
 
-	success, result = pcall(run, program, input_file, output_file)
+	success, result = pcall(run.execute, program, input_file, output_file)
 	if not success then
 		print("Execution failed!")
 		print(result)

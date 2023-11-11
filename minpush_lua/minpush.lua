@@ -1,5 +1,5 @@
-require "compile"
-require "run"
+local compile = require "compile"
+local run = require "run"
 
 local filename = assert(arg[1], "No program!")
 local src_file = assert(io.open(filename), "Cannot open: "..filename)
@@ -8,10 +8,10 @@ src_file:close()
 
 print("compiling...")
 
-local prog = compile(text)
+local prog = compile.compile(text)
 
 print("running...")
 
-run(prog)
+run.execute(prog)
 
 print("done")

@@ -1,4 +1,4 @@
-function compare (a, b)
+local function compare (a, b)
 	-- Compare two objects recursively
 	local t = type(a)
 	if t ~= type(b) then
@@ -19,3 +19,6 @@ function compare (a, b)
 		return a == b
 	end
 end
+
+
+return compare
